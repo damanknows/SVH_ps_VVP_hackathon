@@ -1,0 +1,93 @@
+'use client';
+
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useTheme } from 'next-themes';
+import { useLiveData } from '@/hooks/useLiveData';
+import { Sun, Moon, Languages, Radio, Activity, Sparkles } from 'lucide-react';
+
+export function Navbar() {
+  const { t, i18n } = useTranslation();
+  const { theme, setTheme } = useTheme();
+  const { connected, isStandalone, latencyMs } = useLiveData();
+
+  const toggleLanguage = () => {
+    const nextLang = i18n.language === 'en' ? 'hi' : 'en';
+    i18n.changeLanguage(nextLang);
+  };
+
+  return (
+    <header className="h-16 px-6 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between sticky top-0 z-40">
+      {/* Brand & Subtitle */}
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-amber-500 flex items-center justify-center text-white shadow-md font-black tracking-wider text-sm">
+          SV
+        </div>
+        <div>
+          <h1 className="text-base font-black tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+            {t('app.title')}
+            <span className="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              PAIR B
+            </span>
+          </h1>
+          <p className="text-xs text-zinc-500 hidden sm:block">
+            {t('app.subtitle')}
+          </p>
+        </div>
+      </div>
+
+      {/* Connection & Actions */}
+      <div className="flex items-center gap-3">
+        {/* Live / Standalone Status Indicator */}
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-semibold">
+          <span className="relative flex h-2.5 w-2.5">
+            <span
+              className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                connected ? (isStandalone ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-red-400'
+              }`}
+            />
+            <span
+              className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+                connected ? (isStandalone ? 'bg-amber-500' : 'bg-emerald-500') : 'bg-red-500'
+              }`}
+            />
+          </span>
+          <span className="text-zinc-700 dark:text-zinc-300 font-mono text-[11px]">
+            {isStandalone ? t('status.offline') : t('status.live')}
+          </span>
+          <span className="text-zinc-400 font-mono text-[10px] flex items-center gap-0.5 border-l border-zinc-300 dark:border-zinc-700 pl-2">
+            <Activity className="w-3 h-3 text-emerald-500" />
+            {latencyMs}ms
+          </span>
+        </div>
+
+        {/* Secret Demo Hint */}
+        <div
+          title="Secret Demo Controller (Ctrl+Shift+D)"
+          className="hidden lg:flex items-center gap-1 text-[11px] font-mono text-zinc-500 px-2.5 py-1 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-800"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          Ctrl+Shift+D
+        </div>
+
+        {/* Language Switcher */}
+        <button
+          onClick={toggleLanguage}
+          className="px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 transition flex items-center gap-1.5 cursor-pointer border border-zinc-200 dark:border-zinc-700"
+        >
+          <Languages className="w-3.5 h-3.5 text-emerald-500" />
+          {i18n.language.toUpperCase()}
+        </button>
+
+        {/* Theme Toggle */}
+        <button
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 transition cursor-pointer border border-zinc-200 dark:border-zinc-700"
+        >
+          <Sun className="w-4 h-4 hidden dark:block text-amber-400" />
+          <Moon className="w-4 h-4 block dark:hidden text-zinc-700" />
+        </button>
+      </div>
+    </header>
+  );
+}
