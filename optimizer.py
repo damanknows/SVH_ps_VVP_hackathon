@@ -249,10 +249,12 @@ class VppOptimizer:
                     "solve_time_ms": elapsed_ms,
                 }
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             elapsed_ms = (time.perf_counter() - t_start) * 1000.0
             return {
-                "status": "infeasible",
-                "termination_condition": f"Error: {e}",
+                "status": "error",
+                "termination_condition": f"Exception: {e}",
                 "solve_time_ms": elapsed_ms,
             }
 
@@ -362,6 +364,10 @@ class VppOptimizer:
         adjusted_schedule["worst_case_flagged"] = is_breached
 
         if is_breached:
+            adjusted_schedule["p_bat_dis"] = list(planned_schedule["p_bat_dis"])
+            adjusted_schedule["p_bat_ch"] = list(planned_schedule["p_bat_ch"])
+            adjusted_schedule["p_grid_imp"] = list(planned_schedule["p_grid_imp"])
+            
             # Force conservative pre-charge at current timestep t=0
             # Boost charging or cancel discharging
             adjusted_schedule["p_bat_dis"][0] = 0.0

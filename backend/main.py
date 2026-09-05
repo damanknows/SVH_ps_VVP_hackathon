@@ -13,7 +13,9 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, WebSocket, WebSocketDisconnect, Depends, Header
+import asyncio
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
 # Ensure trainee folder is on Python path
@@ -72,13 +74,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def verify_api_key(vpp_api_key: Optional[str] = Header(None)):
+    expected_key = os.getenv("VPP_API_KEY")
+    if expected_key:
+        if vpp_api_key != expected_key:
+            raise HTTPException(status_code=403, detail="Invalid API Key")
 
 
 @app.get("/")
@@ -102,9 +113,9 @@ def get_current_telemetry(event: Optional[str] = Query(None, description="DEMO_S
     """
     Retrieves real-time physically grounded microgrid telemetry from simulator.py.
     """
-    np.random.seed(42)
+    rng = np.random.default_rng(42)
     # Generate live telemetry using trainee/simulator.py
-    sim_data = simulator.generate_telemetry()
+    sim_data = simulator.generate_telemetry(rng=rng)
     now_str = sim_data.get("timestamp", datetime.now().isoformat())
 
     solar_val = float(sim_data.get("solar_kw", 0.0))
@@ -204,7 +215,7 @@ def get_recommendations():
     return recommendations
 
 
-@app.post("/api/optimize", response_model=OptimizationOutputSchema)
+@app.post("/api/optimize", response_model=OptimizationOutputSchema, dependencies=[Depends(verify_api_key)])
 def optimize_dispatch(request: Optional[OptimizationRequest] = None):
     """
     Computes 24-hour optimal battery and grid dispatch schedule via Pyomo + HiGHS LP.
@@ -291,7 +302,7 @@ def optimize_dispatch(request: Optional[OptimizationRequest] = None):
     )
 
 
-@app.post("/api/demo/scenario", response_model=OptimizationOutputSchema)
+@app.post("/api/demo/scenario", response_model=OptimizationOutputSchema, dependencies=[Depends(verify_api_key)])
 def trigger_demo_scenario(request: DemoScenarioRequest):
     """
     Executes optimization against synthetic stress-test scenarios
@@ -349,9 +360,15 @@ def trigger_demo_scenario(request: DemoScenarioRequest):
 
     # Custom parameter overrides if provided
     if "solar_factor" in override:
-        solar = np.clip(solar * float(override["solar_factor"]), 0.0, 200.0)
+        val = float(override["solar_factor"])
+        if val < 0.0 or val > 5.0:
+            raise HTTPException(status_code=422, detail="solar_factor must be between 0.0 and 5.0")
+        solar = np.clip(solar * val, 0.0, 200.0)
     if "demand_factor" in override:
-        demand = demand * float(override["demand_factor"])
+        val = float(override["demand_factor"])
+        if val < 0.0 or val > 5.0:
+            raise HTTPException(status_code=422, detail="demand_factor must be between 0.0 and 5.0")
+        demand = demand * val
 
     plan = optimizer.safe_solve(solar, wind, demand, initial_soc=150.0, start_hour=datetime.now().hour)
     benchmark = optimizer.benchmark_dispatch_savings(solar, wind, demand, initial_soc=150.0)
@@ -376,6 +393,78 @@ def trigger_demo_scenario(request: DemoScenarioRequest):
         recommendations=recommendations,
         status="emergency" if summary.is_emergency_plan else "optimal",
     )
+
+
+class SimulationInput(BaseModel):
+    scenario: Optional[str] = None
+    override: Optional[Dict[str, Any]] = None
+    model_config = {"extra": "allow"}
+
+@app.post("/api/simulate", dependencies=[Depends(verify_api_key)])
+def api_simulate(request: SimulationInput):
+    """
+    Wraps simulator.generate_telemetry() and accepts an optional scenario override body.
+    Also returns the frontend-expected SimulationResult fields to avoid breaking the UI.
+    """
+    rng = np.random.default_rng()
+    sim_data = simulator.generate_telemetry(rng=rng)
+    
+    input_dict = request.model_dump()
+    capRatio = input_dict.get("batteryCapacityKwh", 200) / 300
+    exportRatio = input_dict.get("exportLimitKw", 100) / 200
+    carbonFactor = input_dict.get("carbonPriceInrPerTon", 800) / 800
+    criticalLoadPct = input_dict.get("criticalLoadPct", 20)
+    
+    annualSavingsInr = round(720000 * (0.4 + capRatio * 0.4 + exportRatio * 0.2 * carbonFactor))
+    co2eAvoidedTons = round(75 * (0.5 + capRatio * 0.5))
+    gridIndependencePct = min(98, round(55 + capRatio * 20 + exportRatio * 10 - criticalLoadPct * 0.2))
+    bessCyclesPerYear = round(360 - capRatio * 40)
+    
+    return {
+        "telemetry": sim_data,
+        "annualSavingsInr": annualSavingsInr,
+        "co2eAvoidedTons": co2eAvoidedTons,
+        "gridIndependencePct": gridIndependencePct,
+        "bessCyclesPerYear": bessCyclesPerYear,
+        "baseline": {
+            "batteryCapacityKwh": input_dict.get("batteryCapacityKwh", 200),
+            "exportLimitKw": input_dict.get("exportLimitKw", 100),
+            "carbonPriceInrPerTon": input_dict.get("carbonPriceInrPerTon", 800),
+            "criticalLoadPct": criticalLoadPct,
+            "annualSavingsInr": 200000
+        }
+    }
+
+@app.websocket("/ws/live")
+async def websocket_live(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            state = get_current_telemetry()
+            payload = {
+                "timestamp": state.timestamp,
+                "socPct": state.battery_soc_pct,
+                "flowsKw": {
+                    "solar": state.solar_kw,
+                    "wind": state.wind_kw,
+                    "load": -state.campus_load_kw,
+                    "grid": state.grid_import_kw,
+                    "battery": 0.0,
+                    "export": 0.0,
+                    "critical_load": 0.0,
+                    "curtail": 0.0
+                },
+                "gridStatus": "import" if state.grid_import_kw > 0 else "islanded",
+                "autonomyPct": min(100.0, round(((state.solar_kw + state.wind_kw) / max(state.campus_load_kw, 1.0)) * 100, 1)),
+                "savingsPerHour": 0.0
+            }
+            await websocket.send_json({
+                "type": "telemetry",
+                "payload": payload
+            })
+            await asyncio.sleep(2)
+    except WebSocketDisconnect:
+        pass
 
 
 if __name__ == "__main__":

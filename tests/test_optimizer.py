@@ -143,4 +143,32 @@ def test_benchmark_dispatch_savings(opt, diurnal_profiles):
     assert "arbitrage_savings_rupees" in res
     assert "savings_percentage" in res
     assert "hourly_schedule" in res
+    assert res["hourly_schedule"] in res
     assert res["arbitrage_savings_rupees"] >= 0.0
+
+
+def test_check_worst_case_does_not_mutate_original(opt, diurnal_profiles):
+    solar, wind, demand = diurnal_profiles
+    
+    # Mock a valid schedule to avoid depending on the solver's availability
+    plan = {
+        "status": "optimal",
+        "p_bat_ch": [10.0] * 24,
+        "p_bat_dis": [5.0] * 24,
+        "p_grid_imp": [20.0] * 24,
+        "p_grid_exp": [0.0] * 24,
+        "soc": [60.0] * 24,
+        "total_cost_inr": 1000.0
+    }
+    
+    import copy
+    original_plan = copy.deepcopy(plan)
+    
+    p10_solar = solar * 0.10
+    # This should trigger a breach and modification in adjusted
+    breached, adjusted = opt.check_worst_case(plan, p10_solar, wind, demand, initial_soc=60.0)
+    
+    # The original plan should remain entirely unmodified
+    assert plan["p_bat_ch"] == original_plan["p_bat_ch"]
+    assert plan["p_bat_dis"] == original_plan["p_bat_dis"]
+    assert plan["p_grid_imp"] == original_plan["p_grid_imp"]

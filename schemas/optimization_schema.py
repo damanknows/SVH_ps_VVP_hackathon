@@ -42,8 +42,8 @@ class OptimizationSummary(BaseModel):
 
 class OptimizationRequest(BaseModel):
     current_state: Optional[CurrentMicrogridState] = None
-    horizon_hours: int = Field(default=24, ge=1, le=48, description="Optimization lookahead horizon in hours")
-    initial_soc_kwh: Optional[float] = Field(None, description="Starting battery storage in kWh (defaults to 150.0 kWh)")
+    horizon_hours: int = Field(default=24, ge=1, le=72, description="Optimization lookahead horizon in hours")
+    initial_soc_kwh: Optional[float] = Field(None, ge=0.0, description="Starting battery storage in kWh (defaults to 150.0 kWh)")
     scenario_override: Optional[str] = Field(None, description="Demo scenario name (e.g. heatwave, wind_drought, storm, monsoon)")
 
 
