@@ -1,6 +1,6 @@
 import React from 'react';
 import { TelemetryPoint } from '../types/energy';
-import { Zap, BatteryCharging, ArrowDownRight, ArrowUpRight, ShieldCheck, DollarSign } from 'lucide-react';
+import { Zap, BatteryCharging, ArrowDownRight, ArrowUpRight, Leaf, DollarSign } from 'lucide-react';
 
 interface IndustrialMetricStripProps {
   current: TelemetryPoint;
@@ -8,97 +8,136 @@ interface IndustrialMetricStripProps {
 
 export const IndustrialMetricStrip: React.FC<IndustrialMetricStripProps> = ({ current }) => {
   const totalGenKw = current.solarKw + current.windKw;
-  const greenSharePct = current.campusDemandKw > 0
-    ? Math.min(100, Math.round((totalGenKw / current.campusDemandKw) * 100))
-    : 100;
-
   const isCharging = current.batteryFlowKw > 0;
   const isDischarging = current.batteryFlowKw < 0;
 
+  // Calculate 10 discrete tick marks for battery bar (Objective 4)
+  const ticksCount = 10;
+  const activeTicks = Math.round((current.batterySoc / 100) * ticksCount);
+
+  // Calculated daily savings & CO2 avoided
+  const dailySavingsInr = Math.round(totalGenKw * 7.5);
+  const co2AvoidedKg = Math.round(totalGenKw * 0.82);
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
       
-      {/* 1. Renewable Generation Telemetry */}
-      <div className="console-panel p-4 rounded-sm relative">
+      {/* Card 1: Renewable Generation */}
+      <div className="bg-[#131B2E]/70 border border-slate-700/50 border-t-2 border-t-amber-500/80 rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-          <span className="font-mono uppercase tracking-wider text-[11px]">Renewable Output</span>
-          <span className="font-mono text-emerald-400 font-semibold">{greenSharePct}% SHARE</span>
-        </div>
-        
-        <div className="flex items-baseline space-x-2">
-          <span className="text-2xl font-mono font-bold text-slate-100">{totalGenKw}</span>
-          <span className="text-xs font-mono text-slate-400">kW Active</span>
+          <span className="font-sans font-medium text-slate-300">Renewable Generation</span>
+          <span className="text-xs font-mono font-semibold text-emerald-400">
+            {current.campusDemandKw > 0 ? Math.min(100, Math.round((totalGenKw / current.campusDemandKw) * 100)) : 100}% Share
+          </span>
         </div>
 
-        <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>Solar PV: <strong className="text-amber-400 font-normal">{current.solarKw} kW</strong></span>
-          <span>Wind: <strong className="text-cyan-400 font-normal">{current.windKw} kW</strong></span>
+        <div className="flex items-baseline space-x-2">
+          <span className="text-3xl font-mono font-bold text-white">{totalGenKw}</span>
+          <span className="text-sm font-sans text-slate-400">kW</span>
+        </div>
+
+        {/* Micro bar for Solar & Wind split */}
+        <div className="mt-3 pt-3 border-t border-slate-700/40 flex items-center justify-between text-xs font-sans">
+          <div className="flex items-center space-x-1.5">
+            <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span className="text-slate-400">Solar:</span>
+            <span className="font-mono font-semibold text-amber-400">{current.solarKw} kW</span>
+          </div>
+          <div className="flex items-center space-x-1.5">
+            <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+            <span className="text-slate-400">Wind:</span>
+            <span className="font-mono font-semibold text-sky-400">{current.windKw} kW</span>
+          </div>
         </div>
       </div>
 
-      {/* 2. BESS Energy Storage Bank */}
-      <div className="console-panel p-4 rounded-sm relative">
+      {/* Card 2: BESS Energy Storage with 10 Segmented Ticks */}
+      <div className="bg-[#131B2E]/70 border border-slate-700/50 border-t-2 border-t-emerald-500/80 rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-          <span className="font-mono uppercase tracking-wider text-[11px]">BESS Storage SOC</span>
-          <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${
+          <span className="font-sans font-medium text-slate-300">BESS Battery Storage</span>
+          <span className={`text-xs font-sans px-2 py-0.5 rounded-full border ${
             isCharging
-              ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
+              ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/60'
               : isDischarging
-              ? 'bg-amber-950 text-amber-400 border-amber-800'
+              ? 'bg-amber-950/60 text-amber-300 border-amber-800/60'
               : 'bg-slate-800 text-slate-400 border-slate-700'
           }`}>
-            {isCharging ? `CHG +${current.batteryFlowKw}kW` : isDischarging ? `DISCHG ${current.batteryFlowKw}kW` : 'STANDBY'}
+            {isCharging ? `Charging +${current.batteryFlowKw}kW` : isDischarging ? `Discharging ${current.batteryFlowKw}kW` : 'Standby'}
           </span>
         </div>
 
         <div className="flex items-baseline space-x-2">
-          <span className="text-2xl font-mono font-bold text-slate-100">{current.batterySoc}%</span>
-          <span className="text-xs font-mono text-slate-400">250 kWh Capacity</span>
+          <span className="text-3xl font-mono font-bold text-white">{current.batterySoc}%</span>
+          <span className="text-sm font-sans text-slate-400">250 kWh LiFePO4</span>
         </div>
 
-        <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>Chemistry: <strong className="text-slate-300 font-normal">LiFePO4</strong></span>
-          <span>Target SOC: <strong className="text-slate-300 font-normal">90%</strong></span>
+        {/* 10 Discrete Segmented Tick Marks Bar */}
+        <div className="mt-3 pt-3 border-t border-slate-700/40">
+          <div className="flex items-center space-x-1 justify-between">
+            {Array.from({ length: ticksCount }).map((_, idx) => (
+              <div
+                key={idx}
+                className={`h-2 flex-1 rounded-sm transition-all duration-300 ${
+                  idx < activeTicks
+                    ? current.batterySoc < 30
+                      ? 'bg-rose-500'
+                      : current.batterySoc > 80
+                      ? 'bg-emerald-400'
+                      : 'bg-sky-400'
+                    : 'bg-slate-800'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* 3. Campus Demand vs Grid Import */}
-      <div className="console-panel p-4 rounded-sm relative">
+      {/* Card 3: Campus Demand vs Grid */}
+      <div className="bg-[#131B2E]/70 border border-slate-700/50 border-t-2 border-t-sky-500/80 rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-          <span className="font-mono uppercase tracking-wider text-[11px]">Campus Load / Grid</span>
-          <span className="font-mono text-slate-300">DEMAND: {current.campusDemandKw} kW</span>
+          <span className="font-sans font-medium text-slate-300">Campus Demand & Grid</span>
+          {current.gridExportKw > 0 ? (
+            <span className="text-xs font-sans px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800/60">
+              Net Export: {current.gridExportKw} kW
+            </span>
+          ) : (
+            <span className="text-xs font-sans px-2 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-800/60">
+              Grid Import: {current.gridImportKw} kW
+            </span>
+          )}
         </div>
 
         <div className="flex items-baseline space-x-2">
-          <span className={`text-2xl font-mono font-bold ${current.gridImportKw > 0 ? 'text-rose-400' : 'text-slate-100'}`}>
-            {current.gridImportKw}
-          </span>
-          <span className="text-xs font-mono text-slate-400">kW Grid Import</span>
+          <span className="text-3xl font-mono font-bold text-white">{current.campusDemandKw}</span>
+          <span className="text-sm font-sans text-slate-400">kW Campus Load</span>
         </div>
 
-        <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>Grid Export: <strong className="text-emerald-400 font-normal">{current.gridExportKw} kW</strong></span>
-          <span>Feeder: <strong className="text-slate-300 font-normal">JdVVNL 11kV</strong></span>
+        <div className="mt-3 pt-3 border-t border-slate-700/40 flex items-center justify-between text-xs font-sans text-slate-400">
+          <span>11kV Substation Feeder</span>
+          <span>DISCOM: JdVVNL</span>
         </div>
       </div>
 
-      {/* 4. Financial & Carbon Offset Metrics */}
-      <div className="console-panel p-4 rounded-sm relative">
+      {/* Card 4: Financial & Carbon Offset */}
+      <div className="bg-[#131B2E]/70 border border-slate-700/50 border-t-2 border-t-emerald-400/80 rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-          <span className="font-mono uppercase tracking-wider text-[11px]">Daily Financial Offset</span>
-          <span className="font-mono text-emerald-400">EST. TARIFF</span>
+          <span className="font-sans font-medium text-slate-300">Sustainability & Offset</span>
+          <span className="text-xs font-mono text-emerald-400 font-semibold">Clean Energy</span>
         </div>
 
         <div className="flex items-baseline space-x-1">
-          <span className="text-sm font-mono text-amber-400">₹</span>
-          <span className="text-2xl font-mono font-bold text-slate-100">
-            {Math.round((current.solarKw + current.windKw) * 7.5).toLocaleString('en-IN')}
+          <span className="text-base font-mono text-amber-400 font-bold">₹</span>
+          <span className="text-3xl font-mono font-bold text-white">
+            {dailySavingsInr.toLocaleString('en-IN')}
           </span>
+          <span className="text-xs font-sans text-slate-400 ml-1">saved today</span>
         </div>
 
-        <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>CO₂ Avoided: <strong className="text-emerald-400 font-normal">{Math.round((current.solarKw + current.windKw) * 0.82)} kg</strong></span>
-          <span>Rate: <strong className="text-slate-300 font-normal">₹7.5/kWh</strong></span>
+        <div className="mt-3 pt-3 border-t border-slate-700/40 flex items-center justify-between text-xs font-sans">
+          <div className="flex items-center space-x-1 text-emerald-400 font-medium">
+            <Leaf className="w-3.5 h-3.5" />
+            <span>{co2AvoidedKg} kg CO₂ avoided</span>
+          </div>
         </div>
       </div>
 
