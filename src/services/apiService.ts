@@ -12,6 +12,26 @@ export const mockCampuses: CampusTelemetrySummary[] = [
     gridStatus: 'NORMAL'
   },
   {
+    campusId: 'mnit-jaipur',
+    campusName: 'MNIT Jaipur (Malaviya National Inst. of Tech.)',
+    location: 'Jaipur, Rajasthan',
+    solarCapacityKw: 500,
+    windCapacityKw: 150,
+    batteryCapacityKwh: 400,
+    currentRenewableSharePct: 94.8,
+    gridStatus: 'NORMAL'
+  },
+  {
+    campusId: 'gec-ajmer',
+    campusName: 'Government Engineering College Ajmer',
+    location: 'Ajmer, Rajasthan',
+    solarCapacityKw: 300,
+    windCapacityKw: 80,
+    batteryCapacityKwh: 200,
+    currentRenewableSharePct: 78.5,
+    gridStatus: 'NORMAL'
+  },
+  {
     campusId: 'dte-kota',
     campusName: 'Government Engineering College, Kota',
     location: 'Kota, Rajasthan',
@@ -285,19 +305,19 @@ export async function fetchRajasthanWeatherTelemetry() {
     const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=26.2389&longitude=73.0243&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,cloud_cover,direct_normal_irradiance');
     const data = await res.json();
     return {
-      temp: data.current?.temperature_2m ?? 35.4,
+      temp: data.current?.temperature_2m ?? 32.4,
       humidity: data.current?.relative_humidity_2m ?? 41,
       windSpeedKnots: Math.round((data.current?.wind_speed_10m ?? 16) * 0.539957),
       cloudCoverPct: data.current?.cloud_cover ?? 14,
-      dniWm2: data.current?.direct_normal_irradiance ?? 840
+      dniWm2: data.current?.direct_normal_irradiance ?? 289
     };
   } catch (e) {
     return {
-      temp: 35.4,
+      temp: 32.4,
       humidity: 41,
-      windSpeedKnots: 9,
+      windSpeedKnots: 4,
       cloudCoverPct: 14,
-      dniWm2: 840
+      dniWm2: 289
     };
   }
 }
