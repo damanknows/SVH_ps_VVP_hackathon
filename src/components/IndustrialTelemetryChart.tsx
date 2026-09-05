@@ -13,9 +13,10 @@ import { TelemetryPoint } from '../types/energy';
 
 interface IndustrialTelemetryChartProps {
   data: TelemetryPoint[];
+  onHoverTelemetry?: (point: TelemetryPoint | null) => void;
 }
 
-export const IndustrialTelemetryChart: React.FC<IndustrialTelemetryChartProps> = ({ data }) => {
+export const IndustrialTelemetryChart: React.FC<IndustrialTelemetryChartProps> = ({ data, onHoverTelemetry }) => {
   return (
     <div className="bg-[#131B2E]/70 border border-slate-700/50 rounded-xl p-5 mb-5 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 border-b border-slate-800 pb-3">
@@ -27,7 +28,7 @@ export const IndustrialTelemetryChart: React.FC<IndustrialTelemetryChartProps> =
             </h2>
           </div>
           <p className="text-xs text-slate-400 font-sans mt-0.5">
-            24-Hour continuous profile of Solar PV, Wind Turbine, Grid Import & Campus Demand
+            Hover over timeline points to inspect telemetry values across the 24-hour stream
           </p>
         </div>
 
@@ -54,7 +55,19 @@ export const IndustrialTelemetryChart: React.FC<IndustrialTelemetryChartProps> =
 
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <AreaChart
+            data={data}
+            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            onMouseMove={(state) => {
+              if (state && state.activePayload && state.activePayload.length > 0) {
+                const point = state.activePayload[0].payload as TelemetryPoint;
+                if (onHoverTelemetry) onHoverTelemetry(point);
+              }
+            }}
+            onMouseLeave={() => {
+              if (onHoverTelemetry) onHoverTelemetry(null);
+            }}
+          >
             <defs>
               <linearGradient id="gradientSolar" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.35} />
@@ -137,7 +150,7 @@ export const IndustrialTelemetryChart: React.FC<IndustrialTelemetryChartProps> =
       <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-sans text-slate-400">
         <span>Sampling Interval: 2500ms</span>
         <span>Modbus TCP / MQTT Bus Status: Active</span>
-        <span className="text-emerald-400 font-mono">Telemetry Health: 100%</span>
+        <span className="text-emerald-400 font-mono">Hover Scrubber: Active</span>
       </div>
     </div>
   );
