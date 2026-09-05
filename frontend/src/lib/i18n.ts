@@ -4,8 +4,8 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   en: {
     translation: {
-      "app.title": "VPP Command Bridge",
-      "app.subtitle": "SuryaVayu Distributed Energy Operations",
+      "app.title": "Government of Rajasthan • Directorate of Technical Education",
+      "app.subtitle": "Energy Management & Virtual Power Plant (VPP) Control Cell",
       "nav.dashboard": "Command Bridge",
       "nav.simulator": "Strategy Simulator",
       "nav.reports": "Reports & Analytics",
@@ -39,8 +39,8 @@ const resources = {
   },
   hi: {
     translation: {
-      "app.title": "VPP कमान ब्रिज",
-      "app.subtitle": "सूर्यावायु वितरित ऊर्जा संचालन प्रणाली",
+      "app.title": "राजस्थान सरकार • तकनीकी शिक्षा निदेशालय",
+      "app.subtitle": "ऊर्जा प्रबंधन एवं वर्चुअल पावर प्लांट (VPP) नियंत्रण कक्ष",
       "nav.dashboard": "कमांड डैशबोर्ड",
       "nav.simulator": "रणनीति सिमुलेटर",
       "nav.reports": "रिपोर्ट्स और विश्लेषण",

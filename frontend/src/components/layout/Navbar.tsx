@@ -20,17 +20,20 @@ export function Navbar() {
     <header className="h-16 px-6 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between sticky top-0 z-40">
       {/* Brand & Subtitle */}
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-amber-500 flex items-center justify-center text-white shadow-md font-black tracking-wider text-sm">
-          SV
+        {/* Emblem Logo */}
+        <div className="w-10 h-10 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-xs flex items-center justify-center p-1.5 shrink-0">
+          <svg viewBox="0 0 100 100" className="w-full h-full text-zinc-800 dark:text-zinc-200" fill="currentColor">
+            {/* Ashoka Pillar / Emblem Stylized Representation */}
+            <path d="M50 8 C42 8 38 15 38 22 C38 28 42 32 50 32 C58 32 62 28 62 22 C62 15 58 8 50 8 Z M50 14 C54 14 56 18 56 22 C56 26 54 28 50 28 C46 28 44 26 44 22 C44 18 46 14 50 14 Z" />
+            <path d="M35 34 H65 V42 H35 Z M42 42 H58 V68 H42 Z M35 68 H65 V74 H35 Z M30 74 H70 V82 H30 Z M25 82 H75 V90 H25 Z" />
+            <circle cx="50" cy="78" r="3" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
         </div>
         <div>
-          <h1 className="text-base font-black tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+          <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 leading-tight">
             {t('app.title')}
-            <span className="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-              PAIR B
-            </span>
           </h1>
-          <p className="text-xs text-zinc-500 hidden sm:block">
+          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
             {t('app.subtitle')}
           </p>
         </div>
