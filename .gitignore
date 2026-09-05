@@ -1,0 +1,3 @@
+# Ignore implementation plan files
+vpp-frontend-implementation-plan.md
+vpp-frontend-implementation-plan*.md
