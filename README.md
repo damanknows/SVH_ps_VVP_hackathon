@@ -1,1 +1,0 @@
-# SVH_ps_VVP_hackathon
