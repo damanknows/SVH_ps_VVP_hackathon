@@ -1,6 +1,6 @@
 {
   "physics_version": "2.0.0",
-  "trained_at": "2026-09-03T16:00:22.457458",
+  "trained_at": "2026-09-05T18:15:44.953432",
   "dataset_rows": 8784,
   "split_ratio": 0.8,
   "train_hours": 7027,
@@ -8,7 +8,8 @@
   "features": {
     "solar": [
       "hour_of_day",
-      "day_of_year",
+      "day_sin",
+      "day_cos",
       "cloud_pct",
       "temp_c",
       "shortwave_radiation_instant",
@@ -38,17 +39,27 @@
         "r2": 0.9775
       },
       "random_forest": {
-        "rmse_kw": 2.991,
-        "r2": 0.9979
+        "rmse_kw": 2.912,
+        "r2": 0.998
       },
       "xgboost": {
-        "rmse_kw": 2.787,
-        "r2": 0.9982
+        "rmse_kw": 2.355,
+        "r2": 0.9987
       },
       "champion": "XGBoost",
-      "champion_rmse_kw": 2.787,
-      "champion_r2": 0.9982,
-      "error_reduction_pct": 71.44
+      "champion_rmse_kw": 2.355,
+      "champion_r2": 0.9987,
+      "error_reduction_pct": 75.87,
+      "feature_importance": {
+        "shortwave_radiation_instant": 0.8788,
+        "diffuse_radiation": 0.0847,
+        "direct_normal_irradiance": 0.0256,
+        "hour_of_day": 0.0081,
+        "day_cos": 0.0022,
+        "temp_c": 0.0003,
+        "day_sin": 0.0002,
+        "cloud_pct": 0.0001
+      }
     },
     "wind": {
       "target": "wind_kw",
@@ -67,7 +78,14 @@
       "champion": "RandomForest",
       "champion_rmse_kw": 0.778,
       "champion_r2": 0.9985,
-      "error_reduction_pct": 96.03
+      "error_reduction_pct": 96.03,
+      "feature_importance": {
+        "wind_speed_100m": 0.6903,
+        "wind_speed": 0.3065,
+        "temp_c": 0.0012,
+        "wind_gust": 0.0012,
+        "surface_pressure": 0.0008
+      }
     },
     "demand": {
       "target": "demand_kw",
@@ -76,17 +94,50 @@
         "r2": 0.2886
       },
       "random_forest": {
-        "rmse_kw": 1.254,
-        "r2": 0.9995
+        "rmse_kw": 0.983,
+        "r2": 0.9997
       },
       "xgboost": {
-        "rmse_kw": 0.566,
+        "rmse_kw": 0.621,
         "r2": 0.9999
       },
       "champion": "XGBoost",
-      "champion_rmse_kw": 0.566,
+      "champion_rmse_kw": 0.621,
       "champion_r2": 0.9999,
-      "error_reduction_pct": 98.84
+      "error_reduction_pct": 98.73,
+      "feature_importance": {
+        "temp_c": 0.6416,
+        "hour_of_day": 0.2103,
+        "is_lab_hour": 0.0919,
+        "day_of_week": 0.0562,
+        "is_hostel_peak": 0.0
+      },
+      "demand_cv": {
+        "cv_method": "TimeSeriesSplit(n_splits=5)",
+        "fold_rmses_kw": [
+          28.9,
+          29.842,
+          1.434,
+          1.059,
+          0.526
+        ],
+        "mean_rmse_kw": 12.352,
+        "std_rmse_kw": 13.902
+      }
+    }
+  },
+  "quantile_offsets": {
+    "solar": {
+      "p10_offset": -1.101,
+      "p90_offset": 3.63
+    },
+    "wind": {
+      "p10_offset": -0.275,
+      "p90_offset": 0.42
+    },
+    "demand": {
+      "p10_offset": -0.397,
+      "p90_offset": 0.38
     }
   }
 }

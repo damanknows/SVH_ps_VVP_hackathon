@@ -1,0 +1,76 @@
+{
+  "version": "2.0.0",
+  "target_assets": [
+    "solar_pv",
+    "wind_turb",
+    "load_academic",
+    "load_hostel"
+  ],
+  "asset_id_mapping": {
+    "solar_pv": "solar-pv-block-a",
+    "wind_turb": "wind-turb-1",
+    "load_academic": "load-academic",
+    "load_hostel": "load-hostel"
+  },
+  "reverse_asset_mapping": {
+    "solar-pv-block-a": "solar_pv",
+    "wind-turb-1": "wind_turb",
+    "load-academic": "load_academic",
+    "load-hostel": "load_hostel"
+  },
+  "asset_capacity_kw": {
+    "solar-pv-block-a": 200.0,
+    "wind-turb-1": 50.0,
+    "load-academic": 150.0,
+    "load-hostel": 120.0
+  },
+  "features": {
+    "solar_pv": [
+      "hour_of_day",
+      "day_sin",
+      "day_cos",
+      "cloud_pct",
+      "temp_c",
+      "shortwave_radiation_instant",
+      "direct_normal_irradiance",
+      "diffuse_radiation"
+    ],
+    "wind_turb": [
+      "wind_speed",
+      "wind_speed_100m",
+      "wind_gust",
+      "surface_pressure",
+      "temp_c"
+    ],
+    "load_academic": [
+      "hour_of_day",
+      "day_of_week",
+      "is_lab_hour",
+      "temp_c"
+    ],
+    "load_hostel": [
+      "hour_of_day",
+      "day_of_week",
+      "is_hostel_peak",
+      "temp_c"
+    ]
+  },
+  "quantile_offsets": {
+    "solar_pv": {
+      "p10_offset": -1.101,
+      "p90_offset": 3.63
+    },
+    "wind_turb": {
+      "p10_offset": -0.275,
+      "p90_offset": 0.42
+    },
+    "load_academic": {
+      "p10_offset": -0.388,
+      "p90_offset": 0.262
+    },
+    "load_hostel": {
+      "p10_offset": -0.25,
+      "p90_offset": 0.25
+    }
+  }
+}

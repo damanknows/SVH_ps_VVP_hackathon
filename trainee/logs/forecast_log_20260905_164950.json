@@ -1,0 +1,155 @@
+{
+  "logged_at": "2026-09-05T16:49:50.597520",
+  "physics_version": "2.0.0",
+  "lat": 26.2389,
+  "lon": 73.0243,
+  "forecast_window_start": "2026-09-05T16:00:00+05:30",
+  "forecast_window_end": "2026-09-06T15:00:00+05:30",
+  "horizon_steps": 24,
+  "predictions": [
+    {
+      "timestamp": "2026-09-05T16:00:00+05:30",
+      "predicted_solar_kw": 77.9000015258789,
+      "predicted_wind_kw": 32.1,
+      "predicted_demand_kw": 193.5
+    },
+    {
+      "timestamp": "2026-09-05T17:00:00+05:30",
+      "predicted_solar_kw": 55.900001525878906,
+      "predicted_wind_kw": 19.7,
+      "predicted_demand_kw": 197.60000610351562
+    },
+    {
+      "timestamp": "2026-09-05T18:00:00+05:30",
+      "predicted_solar_kw": 20.299999237060547,
+      "predicted_wind_kw": 16.2,
+      "predicted_demand_kw": 231.1999969482422
+    },
+    {
+      "timestamp": "2026-09-05T19:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 219.10000610351562
+    },
+    {
+      "timestamp": "2026-09-05T20:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 213.5
+    },
+    {
+      "timestamp": "2026-09-05T21:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 209.60000610351562
+    },
+    {
+      "timestamp": "2026-09-05T22:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 203.89999389648438
+    },
+    {
+      "timestamp": "2026-09-05T23:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 199.6999969482422
+    },
+    {
+      "timestamp": "2026-09-06T00:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 101.0999984741211
+    },
+    {
+      "timestamp": "2026-09-06T01:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 98.69999694824219
+    },
+    {
+      "timestamp": "2026-09-06T02:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 93.69999694824219
+    },
+    {
+      "timestamp": "2026-09-06T03:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 89.4000015258789
+    },
+    {
+      "timestamp": "2026-09-06T04:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 86.0
+    },
+    {
+      "timestamp": "2026-09-06T05:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 82.9000015258789
+    },
+    {
+      "timestamp": "2026-09-06T06:00:00+05:30",
+      "predicted_solar_kw": 0.0,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 77.9000015258789
+    },
+    {
+      "timestamp": "2026-09-06T07:00:00+05:30",
+      "predicted_solar_kw": 16.700000762939453,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 119.80000305175781
+    },
+    {
+      "timestamp": "2026-09-06T08:00:00+05:30",
+      "predicted_solar_kw": 52.400001525878906,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 129.3000030517578
+    },
+    {
+      "timestamp": "2026-09-06T09:00:00+05:30",
+      "predicted_solar_kw": 97.19999694824219,
+      "predicted_wind_kw": 49.9,
+      "predicted_demand_kw": 103.19999694824219
+    },
+    {
+      "timestamp": "2026-09-06T10:00:00+05:30",
+      "predicted_solar_kw": 135.3000030517578,
+      "predicted_wind_kw": 49.9,
+      "predicted_demand_kw": 120.19999694824219
+    },
+    {
+      "timestamp": "2026-09-06T11:00:00+05:30",
+      "predicted_solar_kw": 164.8000030517578,
+      "predicted_wind_kw": 49.9,
+      "predicted_demand_kw": 133.8000030517578
+    },
+    {
+      "timestamp": "2026-09-06T12:00:00+05:30",
+      "predicted_solar_kw": 179.5,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 152.8000030517578
+    },
+    {
+      "timestamp": "2026-09-06T13:00:00+05:30",
+      "predicted_solar_kw": 178.6999969482422,
+      "predicted_wind_kw": 50.0,
+      "predicted_demand_kw": 162.6999969482422
+    },
+    {
+      "timestamp": "2026-09-06T14:00:00+05:30",
+      "predicted_solar_kw": 169.3000030517578,
+      "predicted_wind_kw": 49.8,
+      "predicted_demand_kw": 167.89999389648438
+    },
+    {
+      "timestamp": "2026-09-06T15:00:00+05:30",
+      "predicted_solar_kw": 144.1999969482422,
+      "predicted_wind_kw": 49.7,
+      "predicted_demand_kw": 167.89999389648438
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "evaluated_at": "2026-09-05T18:21:36.044992",
+  "physics_version": "2.0.0",
+  "scenarios": {
+    "Heatwave (Days 140-146)": {
+      "description": "Ambient temp > 45 C; tests PV thermal derate & chiller spike",
+      "hours_evaluated": 168,
+      "targets": {
+        "solar_kw": {
+          "rmse_kw": 12.298,
+          "max_abs_err_kw": 32.581,
+          "invariant_check": "PASS"
+        },
+        "wind_kw": {
+          "rmse_kw": 0.607,
+          "max_abs_err_kw": 4.876,
+          "invariant_check": "PASS"
+        },
+        "demand_kw": {
+          "rmse_kw": 3.073,
+          "max_abs_err_kw": 13.841,
+          "invariant_check": "PASS"
+        }
+      }
+    },
+    "Wind Drought (Days 180-186)": {
+      "description": "Wind speed < 2.5 m/s; tests sub-cut-in calm cutoff",
+      "hours_evaluated": 168,
+      "targets": {
+        "solar_kw": {
+          "rmse_kw": 15.155,
+          "max_abs_err_kw": 36.397,
+          "invariant_check": "PASS"
+        },
+        "wind_kw": {
+          "rmse_kw": 0.001,
+          "max_abs_err_kw": 0.003,
+          "invariant_check": "PASS (Max 0.00 kW)"
+        },
+        "demand_kw": {
+          "rmse_kw": 4.299,
+          "max_abs_err_kw": 37.998,
+          "invariant_check": "PASS"
+        }
+      }
+    },
+    "Storm Cutout (Day 210, 14-18h)": {
+      "description": "Wind speed > 25 m/s; tests aerodynamic high-wind furling",
+      "hours_evaluated": 5,
+      "targets": {
+        "solar_kw": {
+          "rmse_kw": 15.84,
+          "max_abs_err_kw": 27.304,
+          "invariant_check": "PASS"
+        },
+        "wind_kw": {
+          "rmse_kw": 1.0,
+          "max_abs_err_kw": 1.0,
+          "invariant_check": "PASS (Max 1.00 kW)"
+        },
+        "demand_kw": {
+          "rmse_kw": 2.314,
+          "max_abs_err_kw": 3.273,
+          "invariant_check": "PASS"
+        }
+      }
+    },
+    "Monsoon Overcast (Days 230-236)": {
+      "description": "Cloud cover 90-100%; tests heavy diffuse attenuation",
+      "hours_evaluated": 168,
+      "targets": {
+        "solar_kw": {
+          "rmse_kw": 2.243,
+          "max_abs_err_kw": 7.757,
+          "invariant_check": "PASS"
+        },
+        "wind_kw": {
+          "rmse_kw": 0.276,
+          "max_abs_err_kw": 1.604,
+          "invariant_check": "PASS"
+        },
+        "demand_kw": {
+          "rmse_kw": 1.468,
+          "max_abs_err_kw": 8.296,
+          "invariant_check": "PASS"
+        }
+      }
+    }
+  },
+  "summary_table": [
+    {
+      "scenario": "Heatwave (Days 140-146)",
+      "target": "solar_kw",
+      "rmse_kw": 12.3,
+      "max_abs_err_kw": 32.58,
+      "invariant_check": "PASS"
+    },
+    {
+      "scenario": "Heatwave (Days 140-146)",
+      "target": "demand_kw",
+      "rmse_kw": 3.07,
+      "max_abs_err_kw": 13.84,
+      "invariant_check": "PASS"
+    },
+    {
+      "scenario": "Wind Drought (Days 180-186)",
+      "target": "wind_kw",
+      "rmse_kw": 0.0,
+      "max_abs_err_kw": 0.0,
+      "invariant_check": "PASS (Max 0.00 kW)"
+    },
+    {
+      "scenario": "Storm Cutout (Day 210, 14-18h)",
+      "target": "wind_kw",
+      "rmse_kw": 1.0,
+      "max_abs_err_kw": 1.0,
+      "invariant_check": "PASS (Max 1.00 kW)"
+    },
+    {
+      "scenario": "Monsoon Overcast (Days 230-236)",
+      "target": "solar_kw",
+      "rmse_kw": 2.24,
+      "max_abs_err_kw": 7.76,
+      "invariant_check": "PASS"
+    }
+  ]
+}

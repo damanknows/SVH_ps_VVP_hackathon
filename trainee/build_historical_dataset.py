@@ -15,6 +15,7 @@ import requests
 import pandas as pd
 import numpy as np
 from physics import solar_output_kw, wind_output_kw, campus_load_kw, PHYSICS_VERSION
+from features import engineer_features
 
 YEAR = 2024
 EXPECTED_HOURS = 8784  # 366 days in 2024 leap year * 24 hours
@@ -63,15 +64,9 @@ def build_dataset():
     if len(df) != EXPECTED_HOURS:
         raise AssertionError(f"Expected exactly {EXPECTED_HOURS} hours for {YEAR}, got {len(df)} rows.")
 
-    # 2. Time-series Feature Engineering
-    print("[2/4] Engineering temporal and academic calendar features...")
-    df["hour_of_day"] = df["timestamp"].dt.hour
-    df["day_of_year"] = df["timestamp"].dt.dayofyear
-    df["day_of_week"] = df["timestamp"].dt.dayofweek
-
-    # Campus academic & lab schedule features
-    df["is_lab_hour"] = ((df["hour_of_day"] >= 9) & (df["hour_of_day"] <= 17) & (df["day_of_week"] < 5)).astype(int)
-    df["is_hostel_peak"] = ((df["hour_of_day"] >= 18) & (df["hour_of_day"] <= 23)).astype(int)
+    # 2. Time-series Feature Engineering (cyclical day_sin/day_cos, academic schedules)
+    print("[2/4] Engineering temporal, cyclical, and academic calendar features...")
+    df = engineer_features(df)
 
     # 3. Apply Single Source of Truth Physics Engine
     print("[3/4] Computing physical energy targets via physics.py (pvlib + aerodynamic power curve)...")

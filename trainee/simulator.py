@@ -20,6 +20,9 @@ CAMPUS_ID = "DTE_JODHPUR"
 BATTERY_CAPACITY_KWH = 500.0  # 500 kWh campus storage
 battery_soc = 65.0  # Initial SoC (%)
 
+# Reproducible sensor jitter generator for hackathon live judging
+_rng = np.random.default_rng(42)
+
 # Cached weather to prevent aggressive rate-limiting
 _cached_weather = None
 _last_weather_fetch = 0
@@ -77,10 +80,10 @@ def generate_telemetry():
         temp_c=w.get("temperature_2m", 30.0),
     )
 
-    # Realistic micro-fluctuations (sensor jitter / small cloud passage / gust turbulence)
-    solar_actual = max(0.0, round(solar_base + (random.uniform(-2.0, 2.0) if solar_base > 0 else 0.0), 1))
-    wind_actual = max(0.0, round(wind_base + random.uniform(-1.5, 1.5), 1))
-    load_actual = max(70.0, round(load_base + random.uniform(-3.0, 3.0), 1))
+    # Realistic micro-fluctuations (seeded reproducible sensor jitter / small cloud passage / gust turbulence)
+    solar_actual = max(0.0, round(solar_base + (float(_rng.uniform(-2.0, 2.0)) if solar_base > 0 else 0.0), 1))
+    wind_actual = max(0.0, round(wind_base + float(_rng.uniform(-1.5, 1.5)), 1))
+    load_actual = max(70.0, round(load_base + float(_rng.uniform(-3.0, 3.0)), 1))
 
     # Closed-loop Battery State of Charge (SoC) Dynamics
     # Net generation surplus charges battery; deficit discharges battery

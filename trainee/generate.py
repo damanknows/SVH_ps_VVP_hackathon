@@ -15,6 +15,7 @@ Saves output to: historical_campus_energy_data.csv
 import pandas as pd
 import numpy as np
 from physics import solar_output_kw, wind_output_kw, campus_load_kw, PHYSICS_VERSION
+from features import engineer_features
 
 YEAR = 2024
 HOURS = 8784  # 366 days * 24 hours
@@ -25,9 +26,8 @@ def generate_stress_test_dataset():
     timestamps = pd.date_range(start=f"{YEAR}-01-01 00:00", periods=HOURS, freq="h", tz="Asia/Kolkata")
     df = pd.DataFrame({"timestamp": timestamps})
 
-    df["hour"] = df["timestamp"].dt.hour
-    df["day_of_year"] = df["timestamp"].dt.dayofyear
-    df["day_of_week"] = df["timestamp"].dt.dayofweek
+    df = engineer_features(df)
+    df["hour"] = df["hour_of_day"]
 
     # Base realistic seasonal temperatures (Rajasthan climate)
     # Seasonal wave peaking in May/June (day ~150), daily diurnal wave peaking at 15:00

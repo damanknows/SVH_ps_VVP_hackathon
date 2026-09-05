@@ -3,7 +3,8 @@ Campus Microgrid 24-Hour Predictive Forecast Engine
 ---------------------------------------------------
 Fetches live forward-looking meteorological forecasts for Jodhpur from Open-Meteo,
 validates model metadata version consistency with physics.py,
-and executes inference using the champion trained Machine Learning models.
+and executes inference using champion Machine Learning models.
+Applies physics-informed night guardrails via pvlib apparent zenith masking.
 
 Returns clean JSON contract for Pair B (Backend API) and Pair C (Dashboard).
 """
@@ -13,7 +14,10 @@ import json
 import requests
 import pandas as pd
 import joblib
+import pvlib.solarposition
+
 from physics import PHYSICS_VERSION
+from features import engineer_features
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 METADATA_PATH = os.path.join(BASE_DIR, "model_metadata.json")
@@ -83,17 +87,28 @@ def forecast_next_24_hours(lat: float = 26.2389, lon: float = 73.0243):
     now = pd.Timestamp.now(tz="Asia/Kolkata").floor("h")
     df = df[df["timestamp"] >= now].head(24).copy().reset_index(drop=True)
 
-    # Feature Engineering
-    df["hour_of_day"] = df["timestamp"].dt.hour
-    df["day_of_year"] = df["timestamp"].dt.dayofyear
-    df["day_of_week"] = df["timestamp"].dt.dayofweek
-    df["is_lab_hour"] = ((df["hour_of_day"] >= 9) & (df["hour_of_day"] <= 17) & (df["day_of_week"] < 5)).astype(int)
-    df["is_hostel_peak"] = ((df["hour_of_day"] >= 18) & (df["hour_of_day"] <= 23)).astype(int)
+    # Feature Engineering (cyclical day_sin/day_cos, academic schedules)
+    df = engineer_features(df)
 
     # Inference with Champion Models
     df["solar_kw"] = solar_model.predict(df[solar_features]).round(1)
     df["wind_kw"] = wind_model.predict(df[wind_features]).round(1)
     df["demand_kw"] = demand_model.predict(df[demand_features]).round(1)
+
+    # Physics-informed thermal extrapolation guardrail for extreme heatwaves (> 45 C)
+    temp_c = df["temp_c"].values
+    extreme_heat = temp_c > 45.0
+    if np.any(extreme_heat):
+        t_max_tree = 45.0
+        hvac_boost = np.where(extreme_heat, ((temp_c - 25.0) ** 1.35 - (t_max_tree - 25.0) ** 1.35) * 4.2, 0.0)
+        df["demand_kw"] = (df["demand_kw"] + hvac_boost).round(1)
+
+    # Physics-informed night guardrail: the ML surrogate may leak small nonzero values near dawn/dusk,
+    # so the same physical night mask physics.py uses for training-time ground truth should be enforced here too.
+    solpos = pvlib.solarposition.get_solarposition(df["timestamp"], lat, lon)
+    zenith = solpos["apparent_zenith"].values
+    is_night = (zenith >= 90.0) | (df["shortwave_radiation_instant"] <= 0.0)
+    df.loc[is_night, "solar_kw"] = 0.0
 
     # Clean JSON contract for Pair B & Pair C
     forecast_output = []
@@ -111,6 +126,6 @@ def forecast_next_24_hours(lat: float = 26.2389, lon: float = 73.0243):
 if __name__ == "__main__":
     print(f"Executing 24-hour predictive forecast engine (Physics Version: {PHYSICS_VERSION})...\n")
     predictions = forecast_next_24_hours()
-    print(f"Generated {len(predictions)} hourly forecasts. First 3 hours preview:")
-    for p in predictions[:3]:
+    print(f"Generated {len(predictions)} hourly forecasts. Preview:")
+    for p in predictions:
         print(f"  {p['timestamp']} | Solar: {p['predicted_solar_kw']:5.1f} kW | Wind: {p['predicted_wind_kw']:5.1f} kW | Demand: {p['predicted_demand_kw']:5.1f} kW")
