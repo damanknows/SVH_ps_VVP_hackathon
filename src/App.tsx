@@ -10,7 +10,7 @@ import { DispatchToast } from './components/DispatchToast';
 import { ExecutiveAuditDrawer } from './components/ExecutiveAuditDrawer';
 import { ArchitectureModal } from './components/ArchitectureModal';
 import { useLiveTelemetry } from './hooks/useLiveTelemetry';
-import { fetchRajasthanWeatherTelemetry } from './services/apiService';
+import { fetchRajasthanWeatherTelemetry, mockCampuses } from './services/apiService';
 import { TelemetryPoint } from './types/energy';
 import { MapPin, Thermometer, Wind, Activity, FileText } from 'lucide-react';
 
@@ -27,6 +27,9 @@ export function App() {
     toggleAutoPilot,
     approveAction
   } = useLiveTelemetry();
+
+  // Active Selected Campus State (Default: MBM Jodhpur)
+  const [selectedCampusId, setSelectedCampusId] = useState<string>('dte-jodhpur');
 
   // Slider States for Live Simulation Control Panel
   const [isSimDrawerOpen, setIsSimDrawerOpen] = useState<boolean>(false);
@@ -52,13 +55,21 @@ export function App() {
   const [isAuditDrawerOpen, setIsAuditDrawerOpen] = useState<boolean>(false);
   const [isArchOpen, setIsArchOpen] = useState<boolean>(false);
 
-  // Sync sliders when base scenario changes
+  const selectedCampus = mockCampuses.find(c => c.campusId === selectedCampusId) || mockCampuses[0];
+
+  // Sync sliders when base scenario or campus changes
   useEffect(() => {
-    setSolarKwSlider(baseTelemetry.solarKw);
-    setWindKwSlider(baseTelemetry.windKw);
-    setCampusDemandSlider(baseTelemetry.campusDemandKw);
+    // Scale baseline generation according to campus solar capacity ratio
+    const ratio = selectedCampus.solarCapacityKw / 350;
+    const solarVal = Math.round(baseTelemetry.solarKw * ratio);
+    const windVal = Math.round(baseTelemetry.windKw * ratio);
+    const demandVal = Math.round(baseTelemetry.campusDemandKw * ratio);
+
+    setSolarKwSlider(solarVal);
+    setWindKwSlider(windVal);
+    setCampusDemandSlider(demandVal);
     setIsSliderActive(false);
-  }, [baseTelemetry]);
+  }, [baseTelemetry, selectedCampusId]);
 
   useEffect(() => {
     fetchRajasthanWeatherTelemetry().then((w: any) => setWeather(w));
@@ -77,7 +88,7 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Dynamically calculate active telemetry point (Hovered > Slider Modified > Base Telemetry)
+  // Dynamically calculate active telemetry point (Hovered > Slider Modified > Base Telemetry scaled to Campus)
   const activeTelemetry: TelemetryPoint = hoveredPoint
     ? hoveredPoint
     : isSliderActive
@@ -98,14 +109,31 @@ export function App() {
           gridExportKw: gExport
         };
       })()
-    : baseTelemetry;
+    : (() => {
+        const ratio = selectedCampus.solarCapacityKw / 350;
+        const sKw = Math.round(baseTelemetry.solarKw * ratio);
+        const wKw = Math.round(baseTelemetry.windKw * ratio);
+        const dKw = Math.round(baseTelemetry.campusDemandKw * ratio);
+        const net = sKw + wKw - dKw;
+        let bFlow = net > 0 ? Math.min(net, 45) : -Math.min(Math.abs(net), 60);
+
+        return {
+          ...baseTelemetry,
+          solarKw: sKw,
+          windKw: wKw,
+          campusDemandKw: dKw,
+          batteryFlowKw: bFlow,
+          gridImportKw: net < 0 ? Math.max(0, Math.abs(net) - Math.abs(bFlow)) : 0,
+          gridExportKw: net > 0 ? Math.max(0, net - bFlow) : 0
+        };
+      })();
 
   // Handle action dispatch with crisp toast micro-feedback
   const handleApproveActionWithToast = (id: string) => {
     approveAction(id);
     const randomLatency = Math.floor(Math.random() * 15) + 12;
     const randomOrderId = Math.floor(Math.random() * 900) + 100;
-    setToastMessage(`Dispatch Order #SV-${randomOrderId} synced to Substation Inverter via Modbus TCP (Latency: ${randomLatency}ms)`);
+    setToastMessage(`Dispatch Order #SV-${randomOrderId} synced to ${selectedCampus.campusName} Substation via Modbus TCP (Latency: ${randomLatency}ms)`);
     
     setTimeout(() => {
       setToastMessage(null);
@@ -121,10 +149,12 @@ export function App() {
         onClose={() => setToastMessage(null)}
       />
 
-      {/* Header Bar */}
+      {/* Header Bar with Interactive Campus Switcher Dropdown */}
       <Header
         scenario={scenario}
         onScenarioChange={setScenario}
+        selectedCampusId={selectedCampusId}
+        onCampusChange={setSelectedCampusId}
         isLiveBackend={isLiveBackend}
         telemetrySourceLabel={telemetrySourceLabel}
         onOpenReport={() => setIsAuditDrawerOpen(true)}
@@ -136,13 +166,13 @@ export function App() {
       {/* Main Canvas */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-6 py-4 space-y-4">
         
-        {/* Compact Weather & Site Context Strip */}
+        {/* Dynamic Weather & Site Context Strip (Updates on Campus Change) */}
         <div className="bg-[#131B2E]/60 border border-slate-700/40 rounded-lg px-4 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-400 font-sans">
           <div className="flex items-center space-x-2">
-            <MapPin className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-300 font-medium">Jodhpur Campus Node-04</span>
+            <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-slate-200 font-semibold">{selectedCampus.campusName}</span>
             <span className="text-slate-500">•</span>
-            <span className="text-slate-400">Jaipur / Jodhpur (26.24°N, 73.02°E)</span>
+            <span className="text-slate-400">{selectedCampus.location}</span>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -184,9 +214,10 @@ export function App() {
           campusDemandSlider={campusDemandSlider}
           setCampusDemandSlider={(val) => { setCampusDemandSlider(val); setIsSliderActive(true); }}
           onResetSliders={() => {
-            setSolarKwSlider(baseTelemetry.solarKw);
-            setWindKwSlider(baseTelemetry.windKw);
-            setCampusDemandSlider(baseTelemetry.campusDemandKw);
+            const ratio = selectedCampus.solarCapacityKw / 350;
+            setSolarKwSlider(Math.round(baseTelemetry.solarKw * ratio));
+            setWindKwSlider(Math.round(baseTelemetry.windKw * ratio));
+            setCampusDemandSlider(Math.round(baseTelemetry.campusDemandKw * ratio));
             setIsSliderActive(false);
           }}
         />

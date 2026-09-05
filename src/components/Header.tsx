@@ -1,10 +1,13 @@
 import React from 'react';
-import { ScenarioId } from '../types/energy';
-import { Cpu, FileText, Sun, CloudRain, Moon, Sliders } from 'lucide-react';
+import { ScenarioId, CampusTelemetrySummary } from '../types/energy';
+import { Cpu, FileText, Sun, CloudRain, Moon, Sliders, Building2, ChevronDown } from 'lucide-react';
+import { mockCampuses } from '../services/apiService';
 
 interface HeaderProps {
   scenario: ScenarioId;
   onScenarioChange: (s: ScenarioId) => void;
+  selectedCampusId: string;
+  onCampusChange: (id: string) => void;
   isLiveBackend: boolean;
   telemetrySourceLabel: string;
   onOpenReport: () => void;
@@ -16,17 +19,21 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   scenario,
   onScenarioChange,
+  selectedCampusId,
+  onCampusChange,
   isLiveBackend,
   onOpenReport,
   onOpenArch,
   isSimDrawerOpen,
   onToggleSimDrawer
 }) => {
+  const selectedCampus = mockCampuses.find(c => c.campusId === selectedCampusId) || mockCampuses[0];
+
   return (
     <header className="bg-[#0B0F17] border-b border-slate-800/80 px-4 lg:px-6 py-3">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
         
-        {/* Left: Brand Logo & Subtitle */}
+        {/* Left: Brand Logo & Interactive Campus Selector */}
         <div className="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
           <div className="flex items-center space-x-3">
             <div className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700/70 flex items-center justify-center font-mono font-bold text-emerald-400 text-sm shadow-sm">
@@ -41,9 +48,22 @@ export const Header: React.FC<HeaderProps> = ({
                   DTE Rajasthan
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-sans">
-                Smart Campus Microgrid • Jodhpur Node-04
-              </p>
+              
+              {/* Campus Selector Dropdown (Objective) */}
+              <div className="flex items-center space-x-1.5 mt-0.5">
+                <Building2 className="w-3 h-3 text-emerald-400" />
+                <select
+                  value={selectedCampusId}
+                  onChange={(e) => onCampusChange(e.target.value)}
+                  className="bg-slate-900 border border-slate-700/60 text-slate-200 text-xs rounded px-2 py-0.5 font-sans cursor-pointer focus:outline-none focus:border-emerald-500 hover:bg-slate-800 transition-all"
+                >
+                  {mockCampuses.map((c) => (
+                    <option key={c.campusId} value={c.campusId} className="bg-slate-900 text-slate-100">
+                      {c.campusName} ({c.location})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
