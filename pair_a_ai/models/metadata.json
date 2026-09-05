@@ -1,0 +1,88 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-09-05T17:00:00+05:30",
+  "horizon_minutes": 1440,
+  "resolution_minutes": 15,
+  "horizon_steps": 96,
+  "target_assets": [
+    "solar-pv-block-a",
+    "wind-turb-1",
+    "load-academic",
+    "load-hostel"
+  ],
+  "quantiles": [0.10, 0.50, 0.90],
+  "asset_capacity_kw": {
+    "solar-pv-block-a": 250.0,
+    "wind-turb-1": 50.0,
+    "load-academic": 160.0,
+    "load-hostel": 110.0
+  },
+  "asset_model_files": {
+    "solar-pv-block-a": "solar_pv_quantile.onnx",
+    "wind-turb-1": "wind_turb_quantile.onnx",
+    "load-academic": "load_academic_quantile.onnx",
+    "load-hostel": "load_hostel_quantile.onnx"
+  },
+  "features": {
+    "solar-pv-block-a": [
+      "temp_c",
+      "shortwave_radiation_instant",
+      "direct_normal_irradiance",
+      "diffuse_radiation",
+      "cloud_pct",
+      "hour_sin",
+      "hour_cos",
+      "day_sin",
+      "day_cos",
+      "lag_1",
+      "lag_4",
+      "lag_96",
+      "rolling_mean_4",
+      "rolling_mean_16"
+    ],
+    "wind-turb-1": [
+      "wind_speed",
+      "wind_speed_100m",
+      "wind_gust",
+      "surface_pressure",
+      "temp_c",
+      "hour_sin",
+      "hour_cos",
+      "day_sin",
+      "day_cos",
+      "lag_1",
+      "lag_4",
+      "lag_96",
+      "rolling_mean_4",
+      "rolling_mean_16"
+    ],
+    "load-academic": [
+      "temp_c",
+      "hour_sin",
+      "hour_cos",
+      "dow_sin",
+      "dow_cos",
+      "is_weekday",
+      "is_lab_hour",
+      "lag_1",
+      "lag_4",
+      "lag_96",
+      "rolling_mean_4",
+      "rolling_mean_16"
+    ],
+    "load-hostel": [
+      "temp_c",
+      "hour_sin",
+      "hour_cos",
+      "dow_sin",
+      "dow_cos",
+      "is_morning_surge",
+      "is_hostel_peak",
+      "lag_1",
+      "lag_4",
+      "lag_96",
+      "rolling_mean_4",
+      "rolling_mean_16"
+    ]
+  }
+}
