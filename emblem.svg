@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450" width="100%" height="100%">
+  <!-- State Emblem of India Silhouette / Vector representation -->
+  <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left Lion Head & Mane -->
+    <path fill="currentColor" stroke="none" d="M60 80 C50 60 40 40 70 20 C90 10 100 30 90 50 C80 60 70 70 60 80 Z" opacity="0.95" />
+    <path fill="currentColor" stroke="none" d="M45 45 C35 30 50 15 70 25 C65 40 55 50 45 45 Z" opacity="0.9" />
+    
+    <!-- Central Lion Head & Mane -->
+    <path fill="currentColor" stroke="none" d="M150 12 C130 12 110 30 115 65 C120 100 135 140 150 140 C165 140 180 100 185 65 C190 30 170 12 150 12 Z" />
+    <!-- Lion Eyes & Muzzle -->
+    <circle cx="138" cy="40" r="3" fill="#ffffff" />
+    <circle cx="162" cy="40" r="3" fill="#ffffff" />
+    <path d="M142 52 Q150 58 158 52" stroke="#ffffff" stroke-width="3" />
+    <path fill="currentColor" d="M146 58 C146 62 154 62 154 58 Z" />
+
+    <!-- Right Lion Head & Mane -->
+    <path fill="currentColor" stroke="none" d="M240 80 C250 60 260 40 230 20 C210 10 200 30 210 50 C220 60 230 70 240 80 Z" opacity="0.95" />
+    <path fill="currentColor" stroke="none" d="M255 45 C265 30 250 15 230 25 C235 40 245 50 255 45 Z" opacity="0.9" />
+
+    <!-- Detailed Manes -->
+    <path d="M110 70 Q130 90 150 70 Q170 90 190 70 M100 100 Q150 130 200 100 M115 120 Q150 150 185 120" stroke-width="3" />
+    <path d="M70 70 Q90 100 120 120 M230 70 Q210 100 180 120" stroke-width="3" />
+
+    <!-- Legs & Pedestal Top -->
+    <path d="M110 140 L110 240 M140 140 L140 240 M160 140 L160 240 M190 140 L190 240" stroke-width="6" stroke="#000" />
+    <path d="M90 240 H210 M80 250 H220" stroke-width="5" />
+
+    <!-- Abacus Band -->
+    <rect x="70" y="250" width="160" height="60" rx="6" fill="currentColor" />
+    <!-- Dharma Chakra (Wheel of Law) -->
+    <circle cx="150" cy="280" r="22" fill="#ffffff" stroke="currentColor" stroke-width="3" />
+    <circle cx="150" cy="280" r="4" fill="currentColor" />
+    <!-- 24 Spokes -->
+    <path d="M150 258 V302 M128 280 H172 M134 264 L166 296 M134 296 L166 264 M140 260 L160 300 M160 260 L140 300 M130 270 L170 290 M130 290 L170 270" stroke="currentColor" stroke-width="1.5" />
+
+    <!-- Bull & Horse Relicts on Abacus -->
+    <path d="M90 280 C95 270 105 270 110 280 Q100 290 90 280 Z" fill="#ffffff" />
+    <path d="M190 280 C195 270 205 270 210 280 Q200 290 190 280 Z" fill="#ffffff" />
+
+    <!-- Lotus Base -->
+    <path d="M80 310 C100 340 200 340 220 310 Z" fill="currentColor" />
+    <path d="M100 320 Q150 350 200 320" stroke="#ffffff" stroke-width="2" />
+
+    <!-- Text: Satyameva Jayate (सत्यमेव जयते) -->
+    <text x="150" y="375" text-anchor="middle" font-family="'Hind', 'Noto Sans Devanagari', sans-serif" font-weight="bold" font-size="20" fill="currentColor">
+      सत्यमेव जयते
+    </text>
+
+    <!-- Text: Government of Rajasthan -->
+    <text x="150" y="405" text-anchor="middle" font-family="'Hind', 'Noto Sans Devanagari', sans-serif" font-weight="bold" font-size="18" fill="currentColor">
+      राजस्थान सरकार
+    </text>
+    <text x="150" y="430" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="600" font-size="14" fill="currentColor">
+      Government of Rajasthan
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,146 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ─── Design Tokens (Shadcn-compatible) ─────────────────────────────── */
+@layer base {
+  :root {
+    /* ── Surfaces ── */
+    --background:           220 20% 97%;
+    --foreground:           222 47% 11%;
+    --card:                 0   0%  100%;
+    --card-foreground:      222 47% 11%;
+    --popover:              0   0%  100%;
+    --popover-foreground:   222 47% 11%;
+
+    /* ── Brand (Grid Blue as Primary) ── */
+    --primary:              217 91% 60%;
+    --primary-foreground:   0   0%  100%;
+    --secondary:            215 20% 93%;
+    --secondary-foreground: 222 47% 11%;
+    --muted:                215 20% 93%;
+    --muted-foreground:     215 16% 47%;
+    --accent:               215 20% 93%;
+    --accent-foreground:    222 47% 11%;
+
+    /* ── Semantic ── */
+    --destructive:          0   84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border:               214 32% 91%;
+    --input:                214 32% 91%;
+    --ring:                 217 91% 60%;
+    --radius:               0.75rem;
+
+    /* ── SuryaVayu Energy Brand Palette ── */
+    --color-solar:          #f5a623;
+    --color-wind:           #14b8a6;
+    --color-grid:           #3b82f6;
+    --color-battery-high:   #22c55e;
+    --color-battery-mid:    #f59e0b;
+    --color-battery-low:    #ef4444;
+    --color-critical:       #dc2626;
+
+    /* ── Sidebar ── */
+    --sidebar-bg:           #ffffff;
+    --sidebar-border:       #e5e7eb;
+    --sidebar-w:            16rem;
+  }
+
+  .dark {
+    --background:           222 47%  6%;
+    --foreground:           213 31% 91%;
+    --card:                 222 47%  9%;
+    --card-foreground:      213 31% 91%;
+    --popover:              222 47%  9%;
+    --popover-foreground:   213 31% 91%;
+
+    --primary:              217 91% 60%;
+    --primary-foreground:   0   0% 100%;
+    --secondary:            222 47% 13%;
+    --secondary-foreground: 213 31% 91%;
+    --muted:                222 47% 13%;
+    --muted-foreground:     215 20% 55%;
+    --accent:               222 47% 13%;
+    --accent-foreground:    213 31% 91%;
+
+    --destructive:          0  63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border:               222 47% 14%;
+    --input:                222 47% 14%;
+    --ring:                 217 91% 60%;
+
+    --sidebar-bg:           #0f172a;
+    --sidebar-border:       #1e293b;
+  }
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                 Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    min-height: 100dvh;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--color-grid);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 5px; height: 5px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { background: rgba(148,163,184,0.3); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.55); }
+
+/* ─── Utility: Glass Panel ────────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.28);
+}
+.dark .glass {
+  background: rgba(15,23,42,0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ─── Utility: Animated Ping Dot ─────────────────────────────────────── */
+.ping-dot {
+  position: relative;
+  display: inline-flex;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+}
+.ping-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  opacity: 0.7;
+  animation: ping 1.4s cubic-bezier(0,0,.2,1) infinite;
+}
+
+/* ─── Print ───────────────────────────────────────────────────────────── */
+@media print {
+  @page { size: A4 landscape; margin: 1.5cm; }
+  body * { visibility: hidden; }
+  #print-report, #print-report * { visibility: visible; }
+  #print-report { position: absolute; left: 0; top: 0; width: 100%; background: #fff; color: #000; }
+}

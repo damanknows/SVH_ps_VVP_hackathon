@@ -1,0 +1,86 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+const resources = {
+  en: {
+    translation: {
+      "app.title": "Government of Rajasthan • Directorate of Technical Education",
+      "app.subtitle": "Energy Management & Virtual Power Plant (VPP) Control Cell",
+      "nav.dashboard": "Command Bridge",
+      "nav.simulator": "Strategy Simulator",
+      "nav.reports": "Reports & Analytics",
+      "status.live": "LIVE STREAM",
+      "status.offline": "STANDALONE / DEMO MODE",
+      "kpi.soc": "Battery State of Charge",
+      "kpi.autonomy": "Microgrid Autonomy",
+      "kpi.savings": "Savings This Hour",
+      "kpi.grid_status": "Grid Interconnect State",
+      "grid.import": "Importing from Grid",
+      "grid.export": "Exporting to Grid",
+      "grid.islanded": "Islanded (Off-Grid)",
+      "action.title": "Action Priority Timeline",
+      "action.view_detail": "View Analysis & Forecast",
+      "action.charge": "Pre-Charge BESS",
+      "action.discharge": "Peak Discharge",
+      "sim.title": "Strategy Simulator & Optimization",
+      "sim.optimize": "Re-Optimize System",
+      "sim.battery_cap": "Battery Capacity (kWh)",
+      "sim.export_limit": "Grid Export Limit (kW)",
+      "sim.carbon_price": "Carbon Credit Price (₹/Ton)",
+      "sim.critical_load": "Critical Load Reserve (%)",
+      "sim.annual_savings": "Est. Annual Savings",
+      "sim.co2_avoided": "CO2 Avoided",
+      "sim.grid_independence": "Grid Independence",
+      "sim.bess_cycles": "BESS Cycles/Yr",
+      "report.title": "Operational Performance Log",
+      "report.export_pdf": "Download PDF Report",
+      "demo.scenario": "Demo Scenario Control (Ctrl+Shift+D)",
+    },
+  },
+  hi: {
+    translation: {
+      "app.title": "राजस्थान सरकार • तकनीकी शिक्षा निदेशालय",
+      "app.subtitle": "ऊर्जा प्रबंधन एवं वर्चुअल पावर प्लांट (VPP) नियंत्रण कक्ष",
+      "nav.dashboard": "कमांड डैशबोर्ड",
+      "nav.simulator": "रणनीति सिमुलेटर",
+      "nav.reports": "रिपोर्ट्स और विश्लेषण",
+      "status.live": "लाइव स्ट्रीम",
+      "status.offline": "ऑफलाइन / डेमो मोड",
+      "kpi.soc": "बैटरी चार्ज स्थिति",
+      "kpi.autonomy": "माइक्रोग्रिड स्वायत्तता",
+      "kpi.savings": "इस घंटे की बचत",
+      "kpi.grid_status": "ग्रिड इंटरकनेक्ट स्थिति",
+      "grid.import": "ग्रिड से आयात हो रहा है",
+      "grid.export": "ग्रिड को निर्यात हो रहा है",
+      "grid.islanded": "आइलैंडेड (ऑफ-ग्रिड)",
+      "action.title": "प्राथमिकता कार्रवाई समयरेखा",
+      "action.view_detail": "पूर्वानुमान विश्लेषण देखें",
+      "action.charge": "बैटरी चार्ज करें",
+      "action.discharge": "बैटरी डिस्चार्ज करें",
+      "sim.title": "रणनीति सिमुलेटर और अनुकूलन",
+      "sim.optimize": "पुनः अनुकूलित करें",
+      "sim.battery_cap": "बैटरी क्षमता (kWh)",
+      "sim.export_limit": "ग्रिड निर्यात सीमा (kW)",
+      "sim.carbon_price": "कार्बन क्रेडिट मूल्य (₹/टन)",
+      "sim.critical_load": "महत्वपूर्ण लोड आरक्षित (%)",
+      "sim.annual_savings": "अनुमानित वार्षिक बचत",
+      "sim.co2_avoided": "कार्बन डाइऑक्साइड की बचत",
+      "sim.grid_independence": "ग्रिड स्वतंत्रता",
+      "sim.bess_cycles": "वार्षिक BESS चक्र",
+      "report.title": "संचालन प्रदर्शन लॉग",
+      "report.export_pdf": "PDF रिपोर्ट डाउनलोड करें",
+      "demo.scenario": "डेमो परिदृश्य नियंत्रण (Ctrl+Shift+D)",
+    },
+  },
+};
+
+i18n.use(initReactI18next).init({
+  resources,
+  lng: 'en', // default language
+  fallbackLng: 'en',
+  interpolation: {
+    escapeValue: false,
+  },
+});
+
+export default i18n;
