@@ -1,6 +1,9 @@
-import { INITIAL_RECOMMENDATIONS } from "@/lib/mockData";
+import { getRecommendationsForCampus } from "@/lib/mockData";
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  return NextResponse.json(INITIAL_RECOMMENDATIONS);
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const campusId = searchParams.get("campus_id") || "gec-bikaner";
+  const recs = getRecommendationsForCampus(campusId);
+  return NextResponse.json(recs);
 }
