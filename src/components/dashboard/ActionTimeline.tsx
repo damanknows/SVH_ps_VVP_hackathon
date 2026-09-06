@@ -30,21 +30,24 @@ export function ActionTimeline({
         return {
           badge: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30 animate-pulse',
           dot: 'bg-red-500',
-          border: 'hover:border-red-500/50',
+          leftAccent: 'border-l-4 border-l-red-500 shadow-[-4px_0_16px_-2px_rgba(239,68,68,0.5)]',
+          border: 'hover:border-red-500/60',
           iconBg: 'bg-red-500/15 text-red-500',
         };
       case 'MED':
         return {
           badge: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
           dot: 'bg-amber-500',
-          border: 'hover:border-amber-500/50',
+          leftAccent: 'border-l-4 border-l-amber-500 shadow-[-4px_0_16px_-2px_rgba(245,166,35,0.45)]',
+          border: 'hover:border-amber-500/60',
           iconBg: 'bg-amber-500/15 text-amber-500',
         };
       case 'LOW':
         return {
           badge: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
           dot: 'bg-emerald-500',
-          border: 'hover:border-emerald-500/50',
+          leftAccent: 'border-l-4 border-l-emerald-500 shadow-[-4px_0_16px_-2px_rgba(34,197,94,0.45)]',
+          border: 'hover:border-emerald-500/60',
           iconBg: 'bg-emerald-500/15 text-emerald-500',
         };
       case 'INFO':
@@ -52,7 +55,8 @@ export function ActionTimeline({
         return {
           badge: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30',
           dot: 'bg-blue-500',
-          border: 'hover:border-blue-500/50',
+          leftAccent: 'border-l-4 border-l-blue-500 shadow-[-4px_0_16px_-2px_rgba(59,130,246,0.45)]',
+          border: 'hover:border-blue-500/60',
           iconBg: 'bg-blue-500/15 text-blue-500',
         };
     }
@@ -97,7 +101,7 @@ export function ActionTimeline({
   };
 
   return (
-    <div className="p-5 sm:p-6 rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex flex-col gap-4">
+    <div className="p-5 sm:p-6 rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex flex-col gap-4">
       {/* ── Section Header ── */}
       <div className="flex items-center justify-between pb-3 border-b border-white/20 dark:border-white/10">
         <div className="flex items-center gap-2.5">
@@ -119,7 +123,7 @@ export function ActionTimeline({
         </span>
       </div>
 
-      {/* ── Action Cards Grid with TiltCard ── */}
+      {/* ── Action Cards Grid with TiltCard & n8n Glowing Left Accent ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {items.map((action, idx) => {
           const cfg = getPriorityConfig(action.priority);
@@ -129,7 +133,7 @@ export function ActionTimeline({
             <TiltCard key={action.id || idx} maxTilt={4}>
               <div
                 onClick={() => setSelectedAction(action)}
-                className={`p-4 h-full rounded-2xl border border-white/30 dark:border-white/10 bg-white/60 dark:bg-black/40 backdrop-blur-xl ${cfg.border} hover:shadow-lg cursor-pointer transition-all duration-200 flex flex-col justify-between group relative overflow-hidden`}
+                className={`p-4 h-full rounded-2xl border border-white/30 dark:border-white/15 bg-white/60 dark:bg-black/45 backdrop-blur-xl ${cfg.leftAccent} ${cfg.border} hover:shadow-xl cursor-pointer transition-all duration-200 flex flex-col justify-between group relative overflow-hidden`}
               >
                 <div>
                   {/* Priority Badge & Time Header */}

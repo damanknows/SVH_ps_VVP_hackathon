@@ -13,6 +13,7 @@ import { ReportTable } from '@/components/reports/ReportTable';
 import { DemoControlPanel } from '@/components/common/DemoControlPanel';
 import { AuroraBackground } from '@/components/common/AuroraBackground';
 import { GhostWatermark } from '@/components/common/GhostWatermark';
+import { FloatingStatusBar } from '@/components/layout/FloatingStatusBar';
 import { useLiveData } from '@/hooks/useLiveData';
 import { useSimulator } from '@/hooks/useSimulator';
 import { mockSimulationResult, mockEngineStatus, mockActions } from '@/lib/mockData';
@@ -203,6 +204,9 @@ export default function Home() {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Floating n8n Workflow Execution Status Bar */}
+      <FloatingStatusBar />
 
       {/* Floating Demo Panel (Ctrl+Shift+D) */}
       <DemoControlPanel />

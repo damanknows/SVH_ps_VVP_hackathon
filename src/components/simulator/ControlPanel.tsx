@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { SimulationInput } from '@/types';
 import { Slider } from '@/components/ui/slider';
-import { Sliders, RefreshCw, Battery, Zap, Coins, ShieldAlert, Sparkles } from 'lucide-react';
+import { Sliders, RefreshCw, Battery, Zap, Coins, ShieldAlert, Play, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ControlPanelProps {
@@ -33,12 +33,12 @@ export function ControlPanel({ onSimulate, isPending }: ControlPanelProps) {
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="p-6 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800 rounded-3xl shadow-sm h-full flex flex-col justify-between"
+      className="p-6 bg-white/70 dark:bg-black/40 backdrop-blur-2xl border border-white/30 dark:border-white/20 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] h-full flex flex-col justify-between"
     >
       <div>
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-          <div className="p-2.5 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-2xl shadow-xs">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/20 dark:border-white/10">
+          <div className="p-2.5 bg-teal-500/15 text-teal-600 dark:text-teal-400 rounded-2xl shadow-xs">
             <Sliders className="w-5 h-5 text-[#14b8a6]" />
           </div>
           <div>
@@ -168,11 +168,11 @@ export function ControlPanel({ onSimulate, isPending }: ControlPanelProps) {
             </div>
           </div>
 
-          {/* Action Button: Re-Optimize Year */}
+          {/* n8n-style Gradient Action Button: Re-Optimize Year */}
           <button
             type="submit"
             disabled={isPending}
-            className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 hover:from-emerald-500 hover:via-teal-500 hover:to-blue-500 text-white shadow-lg shadow-teal-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-4 active:scale-98"
+            className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white shadow-lg shadow-teal-500/25 border border-teal-400/30 transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 mt-4 active:scale-98"
           >
             {isPending ? (
               <>
@@ -181,7 +181,7 @@ export function ControlPanel({ onSimulate, isPending }: ControlPanelProps) {
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 text-amber-300" />
+                <Play className="w-4 h-4 fill-white text-white" />
                 <span>Re-Optimize Year</span>
               </>
             )}
