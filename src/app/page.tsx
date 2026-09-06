@@ -12,6 +12,7 @@ import { ResultCards } from '@/components/simulator/ResultCards';
 import { ReportTable } from '@/components/reports/ReportTable';
 import { DemoControlPanel } from '@/components/common/DemoControlPanel';
 import { AuroraBackground } from '@/components/common/AuroraBackground';
+import { GhostWatermark } from '@/components/common/GhostWatermark';
 import { useLiveData } from '@/hooks/useLiveData';
 import { useSimulator } from '@/hooks/useSimulator';
 import { mockSimulationResult, mockEngineStatus, mockActions } from '@/lib/mockData';
@@ -117,10 +118,16 @@ export default function Home() {
                   <KPIStrip telemetry={telemetry} latencyMs={latencyMs} />
                 </motion.div>
 
-                {/* ── 3. Middle Section: Live Power Flow Distribution (Sankey Diagram & Breakdown) ── */}
-                <motion.div variants={itemVariants}>
-                  <SankeyDiagram flows={telemetry.flowsKw} />
-                </motion.div>
+                {/* ── 3. Middle Section: Live Power Flow Distribution (with n8n Ghost Stats Watermark) ── */}
+                <div className="relative">
+                  <GhostWatermark
+                    statText={`${telemetry.totalGenKw || 457} kW`}
+                    subText={`${telemetry.autonomyPct || 82.4}% AUTONOMY`}
+                  />
+                  <motion.div variants={itemVariants} className="relative z-1">
+                    <SankeyDiagram flows={telemetry.flowsKw} />
+                  </motion.div>
+                </div>
 
                 {/* ── 4. Bottom Section: Action Priority Timeline ── */}
                 <motion.div variants={itemVariants}>
