@@ -1,0 +1,92 @@
+{
+  "physics_version": "2.0.0",
+  "trained_at": "2026-09-03T16:00:22.457458",
+  "dataset_rows": 8784,
+  "split_ratio": 0.8,
+  "train_hours": 7027,
+  "test_hours": 1757,
+  "features": {
+    "solar": [
+      "hour_of_day",
+      "day_of_year",
+      "cloud_pct",
+      "temp_c",
+      "shortwave_radiation_instant",
+      "direct_normal_irradiance",
+      "diffuse_radiation"
+    ],
+    "wind": [
+      "wind_speed",
+      "wind_speed_100m",
+      "wind_gust",
+      "surface_pressure",
+      "temp_c"
+    ],
+    "demand": [
+      "hour_of_day",
+      "day_of_week",
+      "is_lab_hour",
+      "is_hostel_peak",
+      "temp_c"
+    ]
+  },
+  "benchmarks": {
+    "solar": {
+      "target": "solar_kw",
+      "naive_baseline": {
+        "rmse_kw": 9.759,
+        "r2": 0.9775
+      },
+      "random_forest": {
+        "rmse_kw": 2.991,
+        "r2": 0.9979
+      },
+      "xgboost": {
+        "rmse_kw": 2.787,
+        "r2": 0.9982
+      },
+      "champion": "XGBoost",
+      "champion_rmse_kw": 2.787,
+      "champion_r2": 0.9982,
+      "error_reduction_pct": 71.44
+    },
+    "wind": {
+      "target": "wind_kw",
+      "naive_baseline": {
+        "rmse_kw": 19.585,
+        "r2": 0.041
+      },
+      "random_forest": {
+        "rmse_kw": 0.778,
+        "r2": 0.9985
+      },
+      "xgboost": {
+        "rmse_kw": 0.818,
+        "r2": 0.9983
+      },
+      "champion": "RandomForest",
+      "champion_rmse_kw": 0.778,
+      "champion_r2": 0.9985,
+      "error_reduction_pct": 96.03
+    },
+    "demand": {
+      "target": "demand_kw",
+      "naive_baseline": {
+        "rmse_kw": 48.946,
+        "r2": 0.2886
+      },
+      "random_forest": {
+        "rmse_kw": 1.254,
+        "r2": 0.9995
+      },
+      "xgboost": {
+        "rmse_kw": 0.566,
+        "r2": 0.9999
+      },
+      "champion": "XGBoost",
+      "champion_rmse_kw": 0.566,
+      "champion_r2": 0.9999,
+      "error_reduction_pct": 98.84
+    }
+  }
+}
