@@ -206,14 +206,22 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    let wsUrl = process.env.NEXT_PUBLIC_WS_URL || backendConfig.server.wsUrl;
-    if (!wsUrl && typeof window !== 'undefined') {
+    let wsUrl: string;
+    if (typeof window !== 'undefined') {
       const isHttps = window.location.protocol === 'https:';
       const proto = isHttps ? 'wss:' : 'ws:';
-      wsUrl = `${proto}//${window.location.host}/ws/live`;
-    }
-    if (!wsUrl) {
-      wsUrl = 'ws://localhost:8000/ws/live';
+
+      if (process.env.NEXT_PUBLIC_WS_URL) {
+        wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+        if (isHttps && wsUrl.startsWith('ws://')) {
+          wsUrl = wsUrl.replace(/^ws:\/\//, 'wss://');
+        }
+      } else {
+        // Automatically route through current origin's gateway over wss: (or ws: on local dev)
+        wsUrl = `${proto}//${window.location.host}/ws/live`;
+      }
+    } else {
+      wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws/live';
     }
 
     try {
