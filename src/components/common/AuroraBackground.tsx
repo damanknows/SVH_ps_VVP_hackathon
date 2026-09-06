@@ -3,9 +3,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+import { ParticleNetwork } from './ParticleNetwork';
+
 export function AuroraBackground() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      {/* ── n8n-style Workflow Canvas Particle Network (Nodes & Glowing Interconnects) ── */}
+      <ParticleNetwork />
+
       {/* ── Subtle Radial Keynote Grid Overlay ── */}
       <div className="absolute inset-0 bg-[radial-gradient(#ffffff18_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff0f_1px,transparent_1px)] [background-size:24px_24px] opacity-80" />
 
