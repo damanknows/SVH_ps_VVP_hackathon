@@ -1,0 +1,28 @@
+services:
+  # 1. FastAPI Microgrid Backend & ML Engine
+  - type: web
+    name: vvp-maker-backend
+    runtime: python
+    buildCommand: "pip install -r backend/requirements.txt scikit-learn pvlib"
+    startCommand: "cd backend && python main.py"
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.11.9
+    healthCheckPath: /health
+
+  # 2. Next.js Microgrid SCADA Dashboard
+  - type: web
+    name: vvp-maker-frontend
+    runtime: node
+    buildCommand: "cd frontend && npm install && npm run build"
+    startCommand: "cd frontend && npm run start"
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          type: web
+          name: vvp-maker-backend
+          property: host
