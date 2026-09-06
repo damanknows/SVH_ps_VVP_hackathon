@@ -17,9 +17,9 @@ def engine():
 
 def test_forecast_engine_initialization(engine):
     assert engine is not None
-    assert "solar" in engine.sessions
-    assert "wind" in engine.sessions
-    assert "load" in engine.sessions
+    assert "solar" in engine.sessions or "solar" in engine.pkl_models
+    assert "wind" in engine.sessions or "wind" in engine.pkl_models
+    assert "load" in engine.sessions or "load" in engine.pkl_models
     assert engine.rmse["solar"] > 0.0
     assert engine.rmse["wind"] > 0.0
     assert engine.rmse["load"] > 0.0

@@ -50,7 +50,7 @@ export function Header() {
               </span>
               <AlertCircle className="w-3.5 h-3.5 text-amber-200 shrink-0" />
               <span className="truncate">
-                <strong>Reconnecting...</strong> Attempting WS connection to <code className="bg-amber-900/40 px-1.5 py-0.5 rounded text-[11px] font-mono">ws://localhost:8000/ws/live</code> (Attempt #{reconnectAttempt || 1}, next in {reconnectDelaySec || 1}s). Displaying last known good telemetry.
+                <strong>Reconnecting...</strong> Synchronizing with real-time VPP telemetry stream (Attempt #{reconnectAttempt || 1}, next in {reconnectDelaySec || 1}s). Displaying last known good telemetry.
               </span>
             </div>
 

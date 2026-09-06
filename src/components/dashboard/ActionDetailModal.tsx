@@ -59,7 +59,7 @@ export function ActionDetailModal({ action, currentSoc, onClose, onExecute }: Ac
                   {action.priority} PRIORITY
                 </span>
                 <span className="text-xs text-zinc-500">
-                  {new Date(action.time || action.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {action.time || (action.timestamp ? new Date(action.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Scheduled')}
                 </span>
               </div>
               <h3 className="text-xl font-extrabold text-zinc-900 dark:text-zinc-50 mt-1">

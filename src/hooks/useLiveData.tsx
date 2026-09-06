@@ -155,6 +155,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
   const retryMsRef = useRef<number>(1000);
   const attemptCountRef = useRef<number>(0);
   const isUnmountedRef = useRef<boolean>(false);
+  const connectRef = useRef<() => void>(() => {});
 
   // Fallback simulator to keep UI alive with realistic data if backend WS is offline
   const startFallbackSimulator = useCallback(() => {
@@ -322,13 +323,14 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
 
         if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = setTimeout(() => {
-          connectWebSocket();
+          connectRef.current();
         }, currentRetryMs);
       };
     } catch {
       startFallbackSimulator();
     }
   }, [startFallbackSimulator]);
+  connectRef.current = connectWebSocket;
 
   const reconnectNow = useCallback(() => {
     if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
