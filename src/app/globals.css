@@ -139,6 +139,25 @@
 ::-webkit-scrollbar-thumb    { background: rgba(148,163,184,0.3); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.55); }
 
+/* ─── n8n Flowing Stream Keyframes ────────────────────────────────────── */
+@keyframes n8nStreamFlow {
+  from {
+    stroke-dashoffset: 48;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.n8n-flow-stream {
+  animation: n8nStreamFlow 1.6s linear infinite;
+}
+
+.n8n-flow-stream-glow {
+  animation: n8nStreamFlow 2.4s linear infinite;
+}
+
+
 /* ─── Print ───────────────────────────────────────────────────────────── */
 @media print {
   @page { size: A4 landscape; margin: 1.5cm; }
