@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Telemetry } from '@/types';
 import { ShieldCheck, IndianRupee, Sun, ArrowUpRight, ArrowDownRight, Globe } from 'lucide-react';
 import { TiltCard } from '@/components/common/TiltCard';
-import { AnimatedNumber } from '@/components/common/AnimatedNumber';
+import { LiveCounter } from '@/components/common/LiveCounter';
 
 interface KPIStripProps {
   telemetry: Telemetry;
@@ -40,7 +40,7 @@ function CircularGauge({ value, size = 52, strokeWidth = 4.5 }: { value: number;
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.2, ease: 'easeOut' }}
+          transition={{ duration: 1.5, ease: 'easeOut' }}
           strokeLinecap="round"
           fill="transparent"
         />
@@ -62,16 +62,19 @@ export function KPIStrip({ telemetry }: KPIStripProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
       {/* ── KPI 1: Microgrid Autonomy ── */}
       <TiltCard>
-        <div className="p-5 h-full rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex items-center justify-between transition-all hover:border-[#22c55e]/50 group">
+        <div className="p-5 h-full rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex items-center justify-between transition-all hover:border-[#22c55e]/50 group kpi-shimmer-sweep">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
               Microgrid Autonomy
             </p>
             <div className="flex items-baseline gap-1.5 mt-1.5">
               <span className="text-3xl sm:text-4xl font-light tracking-tight text-zinc-900 dark:text-zinc-50 font-mono">
-                <AnimatedNumber value={autonomy} decimals={1} suffix="%" />
+                <LiveCounter value={autonomy} decimals={1} suffix="%" showTrend={true} />
               </span>
-              <span className="text-[10px] sm:text-xs font-semibold text-[#22c55e] bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/20">
+            </div>
+            <div className="mt-1">
+              <span className="text-[10px] sm:text-xs font-semibold text-[#22c55e] bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/20 inline-flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
                 Self-Reliant
               </span>
             </div>
@@ -82,7 +85,7 @@ export function KPIStrip({ telemetry }: KPIStripProps) {
 
       {/* ── KPI 2: Savings This Hour ── */}
       <TiltCard>
-        <div className="p-5 h-full rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex items-center justify-between transition-all hover:border-emerald-500/50 group">
+        <div className="p-5 h-full rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex items-center justify-between transition-all hover:border-emerald-500/50 group kpi-shimmer-sweep">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
               Savings this hour
@@ -90,10 +93,12 @@ export function KPIStrip({ telemetry }: KPIStripProps) {
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-3xl sm:text-4xl font-light tracking-tight text-emerald-600 dark:text-emerald-400 font-mono flex items-center">
                 <IndianRupee className="w-6 h-6 -mr-1" />
-                <AnimatedNumber value={savings} />
+                <LiveCounter value={savings} showTrend={true} />
               </span>
-              <span className="text-xs font-medium text-zinc-400">/hr</span>
             </div>
+            <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 mt-1 uppercase tracking-wider">
+              per hour
+            </p>
           </div>
           <div className="p-3.5 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 rounded-2xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
             <IndianRupee className="w-5 h-5" />
@@ -103,17 +108,19 @@ export function KPIStrip({ telemetry }: KPIStripProps) {
 
       {/* ── KPI 3: Active Gen ── */}
       <TiltCard>
-        <div className="p-5 h-full rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex items-center justify-between transition-all hover:border-[#f5a623]/50 group">
+        <div className="p-5 h-full rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex items-center justify-between transition-all hover:border-[#f5a623]/50 group kpi-shimmer-sweep">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
               Active Gen
             </p>
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-3xl sm:text-4xl font-light tracking-tight text-[#f5a623] font-mono">
-                <AnimatedNumber value={activeGen} />
+                <LiveCounter value={activeGen} suffix=" kW" showTrend={true} />
               </span>
-              <span className="text-xs font-bold text-zinc-400">kW</span>
             </div>
+            <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 mt-1 uppercase tracking-wider">
+              Solar + Wind Output
+            </p>
           </div>
           <div className="p-3.5 bg-amber-500/15 text-[#f5a623] rounded-2xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
             <Sun className="w-5 h-5" />
@@ -123,7 +130,7 @@ export function KPIStrip({ telemetry }: KPIStripProps) {
 
       {/* ── KPI 4: Grid Status ── */}
       <TiltCard>
-        <div className="p-5 h-full rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex items-center justify-between transition-all hover:border-[#3b82f6]/50 group">
+        <div className="p-5 h-full rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex items-center justify-between transition-all hover:border-[#3b82f6]/50 group kpi-shimmer-sweep">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
               Grid Status
@@ -150,6 +157,9 @@ export function KPIStrip({ telemetry }: KPIStripProps) {
                 </span>
               )}
             </div>
+            <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 mt-2 uppercase tracking-wider">
+              Interconnect Live
+            </p>
           </div>
           <div className="p-3.5 bg-blue-500/15 text-[#3b82f6] rounded-2xl shrink-0 group-hover:scale-110 transition-transform shadow-xs">
             <Globe className="w-5 h-5" />

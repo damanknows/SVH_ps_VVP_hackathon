@@ -157,6 +157,50 @@
   animation: n8nStreamFlow 2.4s linear infinite;
 }
 
+/* ─── 4-Second KPI Shimmer Sweep ─────────────────────────────────────── */
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  25%, 100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.kpi-shimmer-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-shimmer-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: shimmerSweep 4s ease-in-out infinite;
+}
+
+.dark .kpi-shimmer-sweep::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+}
+
+
 
 /* ─── Print ───────────────────────────────────────────────────────────── */
 @media print {
