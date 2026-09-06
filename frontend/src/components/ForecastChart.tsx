@@ -117,7 +117,7 @@ export function ForecastChart({ forecast, currentHour, onHourChange }: ForecastC
                 color: "#f8fafc",
                 fontFamily: "monospace",
               }}
-              formatter={(value: any, name: any) => [
+              formatter={(value, name) => [
                 `${value} kW`,
                 name === "solar_kw"
                   ? "Solar Gen"
@@ -125,7 +125,7 @@ export function ForecastChart({ forecast, currentHour, onHourChange }: ForecastC
                   ? "Wind Gen"
                   : name === "demand_kw"
                   ? "Campus Load"
-                  : name,
+                  : String(name ?? ""),
               ]}
             />
 

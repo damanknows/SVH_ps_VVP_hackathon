@@ -56,6 +56,7 @@ export function useMicrogridData() {
       }
 
       // Fallback: Local client-side mock data computation
+      await Promise.resolve();
       setTelemetry(getTelemetryForHour(scenario, hour));
       setForecast(generate24hForecast(scenario));
       setLastUpdated(new Date());
@@ -65,7 +66,10 @@ export function useMicrogridData() {
 
   // Sync state whenever scenario or hour changes
   useEffect(() => {
-    refreshData(currentScenario, currentHour);
+    const timer = setTimeout(() => {
+      void refreshData(currentScenario, currentHour);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [currentScenario, currentHour, refreshData]);
 
   const setScenario = (newScenario: ScenarioPreset) => {

@@ -12,6 +12,7 @@ Returns clean JSON contract for Pair B (Backend API) and Pair C (Dashboard).
 import os
 import json
 import requests
+import numpy as np
 import pandas as pd
 import joblib
 import pvlib.solarposition
