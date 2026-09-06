@@ -1,0 +1,108 @@
+{
+  "solar_kw": {
+    "name": "Solar Generation (kW)",
+    "target_mean_kw": 47.71,
+    "target_range_kw": 179.46,
+    "naive_baseline": {
+      "rmse_kw": 9.759,
+      "mae_kw": 6.089,
+      "r2": 0.9775,
+      "mape_pct": 18.17
+    },
+    "random_forest": {
+      "rmse_kw": 2.996,
+      "mae_kw": 1.431,
+      "r2": 0.9979,
+      "mape_pct": 4.27,
+      "explained_var": 0.998,
+      "max_error_kw": 21.35,
+      "nrmse_pct": 1.67,
+      "error_reduction_pct": 69.3
+    },
+    "gradient_boosting": {
+      "rmse_kw": 2.693,
+      "mae_kw": 1.335,
+      "r2": 0.9983,
+      "mape_pct": 4.81,
+      "explained_var": 0.9985,
+      "max_error_kw": 17.49,
+      "nrmse_pct": 1.5,
+      "error_reduction_pct": 72.4
+    },
+    "serialized_champion": {
+      "error": "No module named 'xgboost'"
+    }
+  },
+  "wind_kw": {
+    "name": "Wind Generation (kW)",
+    "target_mean_kw": 30.77,
+    "target_range_kw": 50.0,
+    "naive_baseline": {
+      "rmse_kw": 19.585,
+      "mae_kw": 17.23,
+      "r2": 0.041,
+      "mape_pct": 79.84
+    },
+    "random_forest": {
+      "rmse_kw": 0.781,
+      "mae_kw": 0.272,
+      "r2": 0.9985,
+      "mape_pct": 1.32,
+      "explained_var": 0.9985,
+      "max_error_kw": 10.62,
+      "nrmse_pct": 1.56,
+      "error_reduction_pct": 96.01
+    },
+    "gradient_boosting": {
+      "rmse_kw": 0.81,
+      "mae_kw": 0.332,
+      "r2": 0.9984,
+      "mape_pct": 1.49,
+      "explained_var": 0.9984,
+      "max_error_kw": 11.08,
+      "nrmse_pct": 1.62,
+      "error_reduction_pct": 95.87
+    },
+    "serialized_champion": {
+      "rmse_kw": 0.778,
+      "mae_kw": 0.272,
+      "r2": 0.9985,
+      "mape_pct": 1.32,
+      "nrmse_pct": 1.56
+    }
+  },
+  "demand_kw": {
+    "name": "Campus Demand (kW)",
+    "target_mean_kw": 140.25,
+    "target_range_kw": 216.57,
+    "naive_baseline": {
+      "rmse_kw": 48.946,
+      "mae_kw": 35.979,
+      "r2": 0.2886,
+      "mape_pct": 30.34
+    },
+    "random_forest": {
+      "rmse_kw": 1.274,
+      "mae_kw": 0.219,
+      "r2": 0.9995,
+      "mape_pct": 0.12,
+      "explained_var": 0.9995,
+      "max_error_kw": 17.97,
+      "nrmse_pct": 0.59,
+      "error_reduction_pct": 97.4
+    },
+    "gradient_boosting": {
+      "rmse_kw": 0.566,
+      "mae_kw": 0.231,
+      "r2": 0.9999,
+      "mape_pct": 0.15,
+      "explained_var": 0.9999,
+      "max_error_kw": 5.8,
+      "nrmse_pct": 0.26,
+      "error_reduction_pct": 98.84
+    },
+    "serialized_champion": {
+      "error": "No module named 'xgboost'"
+    }
+  }
+}

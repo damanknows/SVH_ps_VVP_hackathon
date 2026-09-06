@@ -1,0 +1,67 @@
+{
+  "dataset_summary": {
+    "total_samples_hours": 8784,
+    "train_hours": 7027,
+    "test_hours": 1757,
+    "test_period": "2024-10-19 19:00:00+05:30 to 2024-12-31 23:00:00+05:30",
+    "location": "Jodhpur / Rajasthan DTE Campus Cluster (26.2389\u00b0N, 73.0243\u00b0E)"
+  },
+  "solar_model": {
+    "algorithm": "Gradient Boosting Regressor (XGBoost/GBR Ensemble)",
+    "rmse_overall_kw": 2.693,
+    "mae_overall_kw": 1.335,
+    "r2_score": 0.9983,
+    "daylight_rmse_kw": 3.664,
+    "daylight_mae_kw": 2.461,
+    "daylight_mape_pct": 4.28,
+    "nrmse_pct": 1.5,
+    "feature_importance": {
+      "hour_of_day": 0.0055,
+      "day_of_year": 0.0012,
+      "cloud_pct": 0.0,
+      "temp_c": 0.0004,
+      "shortwave_radiation_instant": 0.8933,
+      "direct_normal_irradiance": 0.0296,
+      "diffuse_radiation": 0.0699
+    }
+  },
+  "wind_model": {
+    "algorithm": "Random Forest Regressor (100 Trees, Depth 12)",
+    "rmse_overall_kw": 0.781,
+    "mae_overall_kw": 0.272,
+    "r2_score": 0.9985,
+    "active_wind_rmse_kw": 0.795,
+    "active_wind_mae_kw": 0.283,
+    "active_wind_mape_pct": 3.48,
+    "nrmse_pct": 1.56,
+    "feature_importance": {
+      "wind_speed": 0.3064,
+      "wind_speed_100m": 0.6904,
+      "wind_gust": 0.0013,
+      "surface_pressure": 0.0008,
+      "temp_c": 0.0012
+    }
+  },
+  "demand_model": {
+    "algorithm": "Gradient Boosting Regressor (200 Estimators)",
+    "rmse_overall_kw": 0.566,
+    "mae_overall_kw": 0.231,
+    "r2_score": 0.9999,
+    "peak_tariff_rmse_kw": 0.227,
+    "peak_tariff_mae_kw": 0.126,
+    "peak_tariff_mape_pct": 0.07,
+    "nrmse_pct": 0.26,
+    "feature_importance": {
+      "hour_of_day": 0.5797,
+      "day_of_week": 0.0595,
+      "is_lab_hour": 0.0044,
+      "is_hostel_peak": 0.0119,
+      "temp_c": 0.3444
+    }
+  },
+  "net_dispatch_balance": {
+    "net_rmse_kw": 2.865,
+    "net_mae_kw": 1.562,
+    "net_r2_score": 0.9977
+  }
+}
