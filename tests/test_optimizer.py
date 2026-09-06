@@ -193,7 +193,7 @@ def test_benchmark_dispatch_savings(opt, diurnal_profiles):
     assert "arbitrage_savings_rupees" in res
     assert "savings_percentage" in res
     assert "hourly_schedule" in res
-    assert res["hourly_schedule"] in res
+    assert len(res["hourly_schedule"]["p_bat_ch"]) == 24
     assert res["arbitrage_savings_rupees"] >= 0.0
 
 

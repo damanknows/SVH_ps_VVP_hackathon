@@ -62,7 +62,7 @@ def test_optimize_invalid_bodies(client):
     resp1 = client.post("/api/optimize", json={"horizon_hours": 0, "initial_soc_kwh": 100.0})
     assert resp1.status_code == 422
     
-    # horizon_hours > 72
+    # horizon_hours > 48
     resp2 = client.post("/api/optimize", json={"horizon_hours": 100, "initial_soc_kwh": 100.0})
     assert resp2.status_code == 422
     
