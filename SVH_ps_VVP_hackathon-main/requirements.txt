@@ -1,0 +1,32 @@
+# Core Machine Learning & Scientific Computing
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+scikit-learn>=1.2.0
+lightgbm>=4.0.0
+
+# ONNX & Acceleration
+onnx>=1.14.0
+onnxruntime>=1.15.0
+onnxmltools>=1.11.0
+skl2onnx>=1.14.0
+
+# Mathematical Programming & Solvers
+pyomo>=6.6.0
+highspy>=1.5.0
+
+# Web Framework & API
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+websockets>=12.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Templating & Configuration
+jinja2>=3.1.2
+pyyaml>=6.0
+
+# Testing & Verification
+pytest>=7.3.0
+httpx>=0.24.0
+pvlib>=0.10.0

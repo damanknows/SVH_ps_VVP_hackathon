@@ -1,0 +1,254 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ─── Design Tokens (Shadcn & Apple Glassmorphism compatible) ──────── */
+@layer base {
+  :root {
+    /* ── Surfaces ── */
+    --background:           220 30% 96%;
+    --foreground:           222 47% 11%;
+    --card:                 0   0%  100%;
+    --card-foreground:      222 47% 11%;
+    --popover:              0   0%  100%;
+    --popover-foreground:   222 47% 11%;
+
+    /* ── Brand (Grid Blue as Primary) ── */
+    --primary:              217 91% 60%;
+    --primary-foreground:   0   0%  100%;
+    --secondary:            215 20% 93%;
+    --secondary-foreground: 222 47% 11%;
+    --muted:                215 20% 93%;
+    --muted-foreground:     215 16% 47%;
+    --accent:               215 20% 93%;
+    --accent-foreground:    222 47% 11%;
+
+    /* ── Semantic ── */
+    --destructive:          0   84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border:               214 32% 91%;
+    --input:                214 32% 91%;
+    --ring:                 217 91% 60%;
+    --radius:               1rem;
+
+    /* ── SuryaVayu Energy Brand Palette ── */
+
+    /* ── Sidebar ── */
+    --sidebar-bg:           rgba(255, 255, 255, 0.65);
+    --sidebar-border:       rgba(255, 255, 255, 0.4);
+    --sidebar-w:            16rem;
+  }
+
+  .dark {
+    --background:           224 71% 4%;
+    --foreground:           210 40% 98%;
+    --card:                 222 47% 7%;
+    --card-foreground:      210 40% 98%;
+    --popover:              222 47% 7%;
+    --popover-foreground:   210 40% 98%;
+
+    --primary:              217 91% 60%;
+    --primary-foreground:   0   0% 100%;
+    --secondary:            222 47% 10%;
+    --secondary-foreground: 213 31% 91%;
+    --muted:                222 47% 10%;
+    --muted-foreground:     215 20% 60%;
+    --accent:               222 47% 10%;
+    --accent-foreground:    213 31% 91%;
+
+    --destructive:          0  63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border:               222 47% 14%;
+    --input:                222 47% 14%;
+    --ring:                 217 91% 60%;
+
+    --sidebar-bg:           rgba(10, 15, 30, 0.65);
+    --sidebar-border:       rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: radial-gradient(circle at 50% 0%, #0b132b 0%, #070d1e 50%, #030712 100%);
+    background-color: #030712;
+    color: hsl(var(--foreground));
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                 Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    min-height: 100dvh;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--color-grid);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+/* ─── Apple Glassmorphism Classes ─────────────────────────────────────── */
+.apple-glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
+}
+
+.dark .apple-glass {
+  background: rgba(13, 20, 38, 0.55);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+}
+
+.apple-glass-card {
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.04);
+}
+
+.dark .apple-glass-card {
+  background: rgba(15, 23, 42, 0.50);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 5px; height: 5px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { background: rgba(148,163,184,0.3); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.55); }
+
+/* ─── n8n Flowing Stream Keyframes ────────────────────────────────────── */
+@keyframes n8nStreamFlow {
+  from {
+    stroke-dashoffset: 48;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.n8n-flow-stream {
+  animation: n8nStreamFlow 1.6s linear infinite;
+}
+
+.n8n-flow-stream-glow {
+  animation: n8nStreamFlow 2.4s linear infinite;
+}
+
+/* ─── 4-Second KPI Shimmer Sweep ─────────────────────────────────────── */
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  25%, 100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.kpi-shimmer-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-shimmer-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: shimmerSweep 4s ease-in-out infinite;
+}
+
+.dark .kpi-shimmer-sweep::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+}
+
+
+
+/* ─── Quiet Luxury (Kinfolk SCADA Editorial) ───────────────────────── */
+.font-editorial-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-editorial-sans {
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-editorial-mono {
+  font-family: 'Space Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.ease-expo-out {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bg-canvas {
+  background-color: #FAF9F6;
+}
+
+.text-ink {
+  color: #111213;
+}
+
+.text-editorial-muted {
+  color: #787878;
+}
+
+.border-editorial-line {
+  border-color: #E8E4DD;
+}
+
+.text-editorial-accent {
+  color: #C65D3A;
+}
+
+.bg-editorial-accent {
+  background-color: #C65D3A;
+}
+
+.text-editorial-teal {
+  color: #006D77;
+}
+
+.bg-editorial-teal {
+  background-color: #006D77;
+}
+
+/* ─── Print ───────────────────────────────────────────────────────────── */
+@media print {
+  @page { size: A4 landscape; margin: 1.5cm; }
+  body * { visibility: hidden; }
+  #rajasthan-vpp-audit-report, #rajasthan-vpp-audit-report * { visibility: visible; }
+  #rajasthan-vpp-audit-report { position: absolute; left: 0; top: 0; width: 100%; background: #fff; color: #000; }
+}

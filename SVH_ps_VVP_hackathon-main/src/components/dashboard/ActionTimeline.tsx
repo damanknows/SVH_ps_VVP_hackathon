@@ -1,0 +1,186 @@
+'use client';
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { ActionItem } from '@/types';
+import { ActionDetailModal } from './ActionDetailModal';
+import { BatteryCharging, Zap, ArrowUpRight, ShieldCheck, ChevronRight, Clock, Fan, Sun, Info, AlertTriangle } from 'lucide-react';
+import { mockActions } from '@/lib/mockData';
+import { TiltCard } from '@/components/common/TiltCard';
+
+interface ActionTimelineProps {
+  actions?: ActionItem[];
+  currentSoc?: number;
+  onExecuteAction?: (action: ActionItem) => void;
+}
+
+export function ActionTimeline({
+  actions = mockActions,
+  currentSoc = 82.4,
+  onExecuteAction,
+}: ActionTimelineProps) {
+  const [selectedAction, setSelectedAction] = useState<ActionItem | null>(null);
+
+  // Use provided actions or fallback to mockActions
+  const items = actions && actions.length > 0 ? actions : mockActions;
+
+  const getPriorityConfig = (priority: string) => {
+    switch (priority) {
+      case 'HIGH':
+        return {
+          badge: 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30 animate-pulse',
+          dot: 'bg-red-500',
+          leftAccent: 'border-l-4 border-l-red-500 shadow-[-4px_0_16px_-2px_rgba(239,68,68,0.5)]',
+          border: 'hover:border-red-500/60',
+          iconBg: 'bg-red-500/15 text-red-500',
+        };
+      case 'MED':
+        return {
+          badge: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+          dot: 'bg-amber-500',
+          leftAccent: 'border-l-4 border-l-amber-500 shadow-[-4px_0_16px_-2px_rgba(245,166,35,0.45)]',
+          border: 'hover:border-amber-500/60',
+          iconBg: 'bg-amber-500/15 text-amber-500',
+        };
+      case 'LOW':
+        return {
+          badge: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+          dot: 'bg-emerald-500',
+          leftAccent: 'border-l-4 border-l-emerald-500 shadow-[-4px_0_16px_-2px_rgba(34,197,94,0.45)]',
+          border: 'hover:border-emerald-500/60',
+          iconBg: 'bg-emerald-500/15 text-emerald-500',
+        };
+      case 'INFO':
+      default:
+        return {
+          badge: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30',
+          dot: 'bg-blue-500',
+          leftAccent: 'border-l-4 border-l-blue-500 shadow-[-4px_0_16px_-2px_rgba(59,130,246,0.45)]',
+          border: 'hover:border-blue-500/60',
+          iconBg: 'bg-blue-500/15 text-blue-500',
+        };
+    }
+  };
+
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'battery-charging':
+        return <BatteryCharging className="w-4 h-4 text-emerald-500" />;
+      case 'fan':
+        return <Fan className="w-4 h-4 text-amber-500" />;
+      case 'sun':
+        return <Sun className="w-4 h-4 text-amber-500" />;
+      case 'info':
+        return <Info className="w-4 h-4 text-blue-500" />;
+      case 'zap':
+        return <Zap className="w-4 h-4 text-amber-500" />;
+      case 'arrow-up-right':
+        return <ArrowUpRight className="w-4 h-4 text-emerald-500" />;
+      case 'shield-check':
+        return <ShieldCheck className="w-4 h-4 text-blue-500" />;
+      default:
+        return <AlertTriangle className="w-4 h-4 text-zinc-500" />;
+    }
+  };
+
+  const formatDisplayTime = (timeStr?: string, timestampStr?: string) => {
+    if (timeStr && (timeStr.includes(':') && timeStr.length <= 8)) {
+      return timeStr; // e.g. "12:00", "12:30"
+    }
+    const val = timeStr || timestampStr;
+    if (!val) return '12:00';
+    try {
+      const d = new Date(val);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+    } catch {
+      // fallback
+    }
+    return val;
+  };
+
+  return (
+    <div className="p-5 sm:p-6 rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex flex-col gap-4">
+      {/* ── Section Header ── */}
+      <div className="flex items-center justify-between pb-3 border-b border-white/20 dark:border-white/10">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shadow-xs">
+            <Clock className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold uppercase tracking-tight text-zinc-900 dark:text-zinc-50">
+              ACTION PRIORITY TIMELINE
+            </h3>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+              AI-driven predictive dispatch directives &amp; microgrid optimization
+            </p>
+          </div>
+        </div>
+
+        <span className="text-xs font-bold px-3 py-1 rounded-full bg-white/40 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 border border-white/20 dark:border-white/10 font-mono">
+          {items.length} Directives
+        </span>
+      </div>
+
+      {/* ── Action Cards Grid with TiltCard & n8n Glowing Left Accent ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        {items.map((action, idx) => {
+          const cfg = getPriorityConfig(action.priority);
+          const displayTime = formatDisplayTime(action.time, action.timestamp);
+
+          return (
+            <TiltCard key={action.id || idx} maxTilt={4}>
+              <div
+                onClick={() => setSelectedAction(action)}
+                className={`p-4 h-full rounded-2xl border border-white/30 dark:border-white/15 bg-white/60 dark:bg-black/45 backdrop-blur-xl ${cfg.leftAccent} ${cfg.border} hover:shadow-xl cursor-pointer transition-all duration-200 flex flex-col justify-between group relative overflow-hidden`}
+              >
+                <div>
+                  {/* Priority Badge & Time Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider border ${cfg.badge}`}>
+                      {action.priority}
+                    </span>
+                    <span className="text-xs font-mono font-bold text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-zinc-400" />
+                      {displayTime}
+                    </span>
+                  </div>
+
+                  {/* Title and Icon */}
+                  <div className="flex items-start gap-2.5 mb-2.5">
+                    <div className="p-2 rounded-xl bg-white/50 dark:bg-white/5 shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+                      {getIcon(action.icon)}
+                    </div>
+                    <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug tracking-tight">
+                      {action.title}
+                    </h4>
+                  </div>
+
+                  {/* Engineering Reason */}
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed font-sans">
+                    {action.reason}
+                  </p>
+                </div>
+
+                {/* Footer CTA */}
+                <div className="mt-4 pt-2.5 border-t border-white/20 dark:border-white/10 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-500">
+                  <span>View Analysis</span>
+                  <ChevronRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </TiltCard>
+          );
+        })}
+      </div>
+
+      {/* Action Detail Inspection Modal */}
+      <ActionDetailModal
+        action={selectedAction}
+        currentSoc={currentSoc}
+        onClose={() => setSelectedAction(null)}
+        onExecute={onExecuteAction || (() => {})}
+      />
+    </div>
+  );
+}
