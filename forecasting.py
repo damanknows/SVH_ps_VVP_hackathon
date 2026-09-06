@@ -18,7 +18,10 @@ import json
 from typing import Dict, List, Any, Optional
 import numpy as np
 import pandas as pd
-import onnxruntime as ort
+try:
+    import onnxruntime as ort
+except (ImportError, OSError):
+    ort = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 METADATA_PATH = os.path.join(BASE_DIR, "model_metadata.json")
@@ -28,7 +31,7 @@ MODELS_ONNX_DIR = os.path.join(BASE_DIR, "models_onnx")
 class ForecastEngine:
     """
     Singleton-friendly inference wrapper managing ONNX sessions and
-    statistically sound prediction intervals.
+    statistically sound prediction intervals with graceful fallback to PKL models.
     """
 
     def __init__(self, models_dir: Optional[str] = None, metadata_path: Optional[str] = None):
@@ -57,17 +60,36 @@ class ForecastEngine:
             "demand": self.metadata["features"]["demand"],
         }
 
-        # Initialize ONNX runtime sessions once
-        opts = ort.SessionOptions()
-        opts.enable_mem_pattern = True
-        opts.intra_op_num_threads = 2
+        self.sessions = {}
+        self.pkl_models = {}
 
-        self.sessions = {
-            "solar": ort.InferenceSession(os.path.join(self.models_dir, "solar_model.onnx"), sess_options=opts, providers=["CPUExecutionProvider"]),
-            "wind": ort.InferenceSession(os.path.join(self.models_dir, "wind_model.onnx"), sess_options=opts, providers=["CPUExecutionProvider"]),
-            "load": ort.InferenceSession(os.path.join(self.models_dir, "load_model.onnx"), sess_options=opts, providers=["CPUExecutionProvider"]),
-            "demand": ort.InferenceSession(os.path.join(self.models_dir, "load_model.onnx"), sess_options=opts, providers=["CPUExecutionProvider"]),
-        }
+        # Initialize ONNX runtime sessions if available
+        if ort is not None:
+            try:
+                opts = ort.SessionOptions()
+                opts.enable_mem_pattern = True
+                opts.intra_op_num_threads = 2
+
+                self.sessions = {
+                    "solar": ort.InferenceSession(os.path.join(self.models_dir, "solar_model.onnx"), sess_options=opts, providers=["CPUExecutionProvider"]),
+                    "wind": ort.InferenceSession(os.path.join(self.models_dir, "wind_model.onnx"), sess_options=opts, providers=["CPUExecutionProvider"]),
+                    "load": ort.InferenceSession(os.path.join(self.models_dir, "load_model.onnx"), sess_options=opts, providers=["CPUExecutionProvider"]),
+                    "demand": ort.InferenceSession(os.path.join(self.models_dir, "load_model.onnx"), sess_options=opts, providers=["CPUExecutionProvider"]),
+                }
+            except Exception as e:
+                print(f"[ForecastEngine] ONNX sessions unavailable ({e}), using PKL models.")
+                self.sessions = {}
+
+        if not self.sessions:
+            import joblib
+            s_path = os.path.join(BASE_DIR, "solar_model.pkl")
+            w_path = os.path.join(BASE_DIR, "wind_model.pkl")
+            d_path = os.path.join(BASE_DIR, "demand_model.pkl")
+            if os.path.exists(s_path) and os.path.exists(w_path) and os.path.exists(d_path):
+                self.pkl_models["solar"] = joblib.load(s_path)
+                self.pkl_models["wind"] = joblib.load(w_path)
+                self.pkl_models["load"] = joblib.load(d_path)
+                self.pkl_models["demand"] = self.pkl_models["load"]
 
     def run(self, features_by_hour: np.ndarray, asset: str) -> Dict[str, List[float]]:
         """
@@ -81,19 +103,21 @@ class ForecastEngine:
         - dict with keys 'p10', 'p50', 'p90' mapped to lists of floats
         """
         asset_key = asset.lower()
-        if asset_key not in self.sessions:
-            raise ValueError(f"Unknown asset '{asset}'. Valid options: {list(self.sessions.keys())}")
-
-        session = self.sessions[asset_key]
-        input_name = session.get_inputs()[0].name
+        if asset_key not in self.sessions and asset_key not in self.pkl_models:
+            raise ValueError(f"Unknown asset '{asset}'. Valid options: {list(self.sessions.keys() or self.pkl_models.keys())}")
 
         # Ensure float32 casting explicitly
         x_in = np.ascontiguousarray(features_by_hour, dtype=np.float32)
         if x_in.ndim == 1:
             x_in = x_in.reshape(1, -1)
 
-        # Execute ONNX forward pass
-        raw_pred = session.run(None, {input_name: x_in})[0].flatten()
+        if asset_key in self.sessions:
+            session = self.sessions[asset_key]
+            input_name = session.get_inputs()[0].name
+            raw_pred = session.run(None, {input_name: x_in})[0].flatten()
+        else:
+            raw_pred = self.pkl_models[asset_key].predict(x_in).flatten()
+
         p50 = np.asarray(raw_pred, dtype=float)
 
         rmse_val = self.rmse[asset_key]

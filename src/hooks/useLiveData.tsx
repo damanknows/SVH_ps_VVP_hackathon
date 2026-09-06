@@ -201,7 +201,15 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws/live';
+    let wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+    if (!wsUrl && typeof window !== 'undefined') {
+      const isHttps = window.location.protocol === 'https:';
+      const proto = isHttps ? 'wss:' : 'ws:';
+      wsUrl = `${proto}//${window.location.host}/ws/live`;
+    }
+    if (!wsUrl) {
+      wsUrl = 'ws://localhost:8000/ws/live';
+    }
 
     try {
       const ws = new WebSocket(wsUrl);
@@ -229,7 +237,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
           payload: {
             id: Math.random().toString(36).substring(2, 9),
             level: 'info',
-            message: 'Connected to live VPP telemetry stream (ws://localhost:8000/ws/live).',
+            message: `Connected to live VPP telemetry stream (${wsUrl}).`,
             timestamp: new Date().toISOString(),
           },
         });

@@ -74,12 +74,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
-allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origin_regex=r".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -458,22 +455,30 @@ async def websocket_live(websocket: WebSocket):
     try:
         while True:
             state = get_current_telemetry()
+            tot_gen = float(state.solar_kw + state.wind_kw)
+            demand = float(state.campus_load_kw)
+            export_kw = max(0.0, round(tot_gen - demand, 1))
+            grid_kw = float(state.grid_import_kw) if state.grid_import_kw > 0 else -export_kw
+            grid_status = "import" if grid_kw > 0 else ("export" if export_kw > 0 else "islanded")
+
             payload = {
                 "timestamp": state.timestamp,
-                "socPct": state.battery_soc_pct,
+                "socPct": round(state.battery_soc_pct, 1),
                 "flowsKw": {
-                    "solar": state.solar_kw,
-                    "wind": state.wind_kw,
-                    "load": -state.campus_load_kw,
-                    "grid": state.grid_import_kw,
+                    "solar": round(state.solar_kw, 1),
+                    "wind": round(state.wind_kw, 1),
+                    "load": round(demand, 1),
+                    "grid": round(grid_kw, 1),
                     "battery": 0.0,
-                    "export": 0.0,
-                    "critical_load": 0.0,
+                    "export": export_kw,
+                    "critical_load": round(demand * 0.38, 1),
                     "curtail": 0.0
                 },
-                "gridStatus": "import" if state.grid_import_kw > 0 else "islanded",
-                "autonomyPct": min(100.0, round(((state.solar_kw + state.wind_kw) / max(state.campus_load_kw, 1.0)) * 100, 1)),
-                "savingsPerHour": 0.0
+                "gridStatus": grid_status,
+                "autonomyPct": min(100.0, max(0.0, round((tot_gen / max(demand, 1.0)) * 100, 1))),
+                "savingsPerHour": round(tot_gen * 7.5, 0),
+                "activeGenKw": round(tot_gen, 1),
+                "totalGenKw": 457.0
             }
             await websocket.send_json({
                 "type": "telemetry",
