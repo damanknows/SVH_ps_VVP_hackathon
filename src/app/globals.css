@@ -1,11 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* ─── Design Tokens (Shadcn-compatible) ─────────────────────────────── */
+/* ─── Design Tokens (Shadcn & Apple Glassmorphism compatible) ──────── */
 @layer base {
   :root {
     /* ── Surfaces ── */
-    --background:           220 20% 97%;
+    --background:           220 30% 96%;
     --foreground:           222 47% 11%;
     --card:                 0   0%  100%;
     --card-foreground:      222 47% 11%;
@@ -28,7 +28,7 @@
     --border:               214 32% 91%;
     --input:                214 32% 91%;
     --ring:                 217 91% 60%;
-    --radius:               0.75rem;
+    --radius:               1rem;
 
     /* ── SuryaVayu Energy Brand Palette ── */
     --color-solar:          #f5a623;
@@ -40,26 +40,26 @@
     --color-critical:       #dc2626;
 
     /* ── Sidebar ── */
-    --sidebar-bg:           #ffffff;
-    --sidebar-border:       #e5e7eb;
+    --sidebar-bg:           rgba(255, 255, 255, 0.65);
+    --sidebar-border:       rgba(255, 255, 255, 0.4);
     --sidebar-w:            16rem;
   }
 
   .dark {
-    --background:           222 47%  6%;
-    --foreground:           213 31% 91%;
-    --card:                 222 47%  9%;
-    --card-foreground:      213 31% 91%;
-    --popover:              222 47%  9%;
-    --popover-foreground:   213 31% 91%;
+    --background:           224 71% 4%;
+    --foreground:           210 40% 98%;
+    --card:                 222 47% 7%;
+    --card-foreground:      210 40% 98%;
+    --popover:              222 47% 7%;
+    --popover-foreground:   210 40% 98%;
 
     --primary:              217 91% 60%;
     --primary-foreground:   0   0% 100%;
-    --secondary:            222 47% 13%;
+    --secondary:            222 47% 10%;
     --secondary-foreground: 213 31% 91%;
-    --muted:                222 47% 13%;
-    --muted-foreground:     215 20% 55%;
-    --accent:               222 47% 13%;
+    --muted:                222 47% 10%;
+    --muted-foreground:     215 20% 60%;
+    --accent:               222 47% 10%;
     --accent-foreground:    213 31% 91%;
 
     --destructive:          0  63% 31%;
@@ -68,8 +68,8 @@
     --input:                222 47% 14%;
     --ring:                 217 91% 60%;
 
-    --sidebar-bg:           #0f172a;
-    --sidebar-border:       #1e293b;
+    --sidebar-bg:           rgba(10, 15, 30, 0.65);
+    --sidebar-border:       rgba(255, 255, 255, 0.08);
   }
 }
 
@@ -80,7 +80,8 @@
   html { scroll-behavior: smooth; }
 
   body {
-    background-color: hsl(var(--background));
+    background: radial-gradient(circle at 50% 0%, #0b132b 0%, #070d1e 50%, #030712 100%);
+    background-color: #030712;
     color: hsl(var(--foreground));
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
                  Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -95,8 +96,41 @@
   [tabindex]:focus-visible {
     outline: 2px solid var(--color-grid);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
+}
+
+/* ─── Apple Glassmorphism Classes ─────────────────────────────────────── */
+.apple-glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
+}
+
+.dark .apple-glass {
+  background: rgba(13, 20, 38, 0.55);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+}
+
+.apple-glass-card {
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.04);
+}
+
+.dark .apple-glass-card {
+  background: rgba(15, 23, 42, 0.50);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.35);
 }
 
 /* ─── Scrollbar ───────────────────────────────────────────────────────── */
@@ -105,42 +139,10 @@
 ::-webkit-scrollbar-thumb    { background: rgba(148,163,184,0.3); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.55); }
 
-/* ─── Utility: Glass Panel ────────────────────────────────────────────── */
-.glass {
-  background: rgba(255,255,255,0.70);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.28);
-}
-.dark .glass {
-  background: rgba(15,23,42,0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.07);
-}
-
-/* ─── Utility: Animated Ping Dot ─────────────────────────────────────── */
-.ping-dot {
-  position: relative;
-  display: inline-flex;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 9999px;
-}
-.ping-dot::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: inherit;
-  opacity: 0.7;
-  animation: ping 1.4s cubic-bezier(0,0,.2,1) infinite;
-}
-
 /* ─── Print ───────────────────────────────────────────────────────────── */
 @media print {
   @page { size: A4 landscape; margin: 1.5cm; }
   body * { visibility: hidden; }
-  #print-report, #print-report * { visibility: visible; }
-  #print-report { position: absolute; left: 0; top: 0; width: 100%; background: #fff; color: #000; }
+  #rajasthan-vpp-audit-report, #rajasthan-vpp-audit-report * { visibility: visible; }
+  #rajasthan-vpp-audit-report { position: absolute; left: 0; top: 0; width: 100%; background: #fff; color: #000; }
 }

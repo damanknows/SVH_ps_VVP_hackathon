@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { ResponsiveContainer, Sankey, Tooltip, Layer, Rectangle } from 'recharts';
 import { Telemetry } from '@/types';
 import { ChartErrorBoundary } from '../common/ChartErrorBoundary';
-import { Zap, Sun, Wind, ArrowDownRight, Battery, Building2, ArrowUpRight, ShieldAlert, LayoutGrid, Table as TableIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Zap, Sun, Wind, ArrowDownRight, Building2, ArrowUpRight, ShieldAlert, LayoutGrid, Table as TableIcon } from 'lucide-react';
+import { TiltCard } from '@/components/common/TiltCard';
 
 interface SankeyDiagramProps {
   flows: Telemetry['flowsKw'];
@@ -47,7 +47,7 @@ const RenderCustomNode = ({ x, y, width, height, index, payload, containerWidth 
         fontWeight="700"
         fill="currentColor"
         alignmentBaseline="middle"
-        className="fill-zinc-800 dark:fill-zinc-200"
+        className="fill-zinc-800 dark:fill-zinc-200 font-sans"
       >
         {nodeName} ({payload?.value ?? 0} kW)
       </text>
@@ -105,24 +105,24 @@ export function SankeyDiagramContent({ flows }: SankeyDiagramProps) {
   return (
     <div className="w-full flex flex-col justify-between space-y-4">
       {/* ── Header ── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/20 dark:border-white/10">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <span className="p-2 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
               <Zap className="w-4 h-4" />
             </span>
-            <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-wide text-zinc-900 dark:text-zinc-50">
+            <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-tight text-zinc-900 dark:text-zinc-50">
               LIVE POWER FLOW DISTRIBUTION (KW)
             </h3>
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 ml-8">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 ml-9">
             Real-time multi-source generation & campus load balancing
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Total Gen Highlight Badge */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-teal-500/10 to-emerald-500/10 border border-amber-500/20 shadow-xs">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-teal-500/15 to-emerald-500/15 border border-amber-500/25 shadow-xs">
             <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
               Total Gen:
             </span>
@@ -132,12 +132,12 @@ export function SankeyDiagramContent({ flows }: SankeyDiagramProps) {
           </div>
 
           {/* Toggle View Mode */}
-          <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700">
+          <div className="flex items-center bg-white/40 dark:bg-white/5 p-1 rounded-xl border border-white/20 dark:border-white/10">
             <button
               onClick={() => setViewMode('diagram')}
-              className={`p-1.5 rounded-md text-xs font-bold transition cursor-pointer ${
+              className={`p-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                 viewMode === 'diagram'
-                  ? 'bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                  ? 'bg-white/80 dark:bg-white/15 text-emerald-600 dark:text-emerald-400 shadow-xs'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
               title="Diagram View"
@@ -146,9 +146,9 @@ export function SankeyDiagramContent({ flows }: SankeyDiagramProps) {
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`p-1.5 rounded-md text-xs font-bold transition cursor-pointer ${
+              className={`p-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                 viewMode === 'table'
-                  ? 'bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                  ? 'bg-white/80 dark:bg-white/15 text-emerald-600 dark:text-emerald-400 shadow-xs'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
               title="Table View"
@@ -200,13 +200,13 @@ export function SankeyDiagramContent({ flows }: SankeyDiagramProps) {
                   return [`${value} kW`, `${src} ➔ ${tgt}`];
                 }}
                 contentStyle={{
-                  backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                  borderColor: '#334155',
-                  borderRadius: '12px',
+                  backgroundColor: 'rgba(10, 15, 30, 0.95)',
+                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                  borderRadius: '16px',
                   color: '#f8fafc',
                   fontSize: '12px',
                   fontWeight: '600',
-                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
+                  boxShadow: '0 20px 30px -5px rgba(0, 0, 0, 0.5)',
                 }}
               />
             </Sankey>
@@ -226,61 +226,61 @@ export function SankeyDiagramContent({ flows }: SankeyDiagramProps) {
       {/* ── Breakdown Boxes Below Diagram ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
         {/* 1. Grid Import (0 kW) */}
-        <div className="p-3.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 flex items-center justify-between">
+        <div className="p-3.5 rounded-2xl bg-blue-500/10 dark:bg-blue-950/40 border border-blue-200/50 dark:border-blue-800/40 backdrop-blur-md flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
               Grid Import
             </span>
-            <p className="text-lg font-extrabold text-blue-950 dark:text-blue-100 font-mono mt-0.5">
+            <p className="text-lg font-light text-blue-950 dark:text-blue-100 font-mono mt-0.5">
               {gridImportVal} kW
             </p>
           </div>
-          <div className="p-2 bg-blue-500/10 text-[#3b82f6] rounded-lg">
+          <div className="p-2 bg-blue-500/15 text-[#3b82f6] rounded-xl">
             <ArrowDownRight className="w-4 h-4" />
           </div>
         </div>
 
         {/* 2. Base Load (321 kW) */}
-        <div className="p-3.5 rounded-xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-900/40 flex items-center justify-between">
+        <div className="p-3.5 rounded-2xl bg-purple-500/10 dark:bg-purple-950/40 border border-purple-200/50 dark:border-purple-800/40 backdrop-blur-md flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
               Base Load
             </span>
-            <p className="text-lg font-extrabold text-purple-950 dark:text-purple-100 font-mono mt-0.5">
+            <p className="text-lg font-light text-purple-950 dark:text-purple-100 font-mono mt-0.5">
               {baseLoadVal} kW
             </p>
           </div>
-          <div className="p-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg">
+          <div className="p-2 bg-purple-500/15 text-purple-600 dark:text-purple-400 rounded-xl">
             <Building2 className="w-4 h-4" />
           </div>
         </div>
 
         {/* 3. Grid Export (45 kW) */}
-        <div className="p-3.5 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-between">
+        <div className="p-3.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 backdrop-blur-md flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               Grid Export
             </span>
-            <p className="text-lg font-extrabold text-emerald-950 dark:text-emerald-100 font-mono mt-0.5">
+            <p className="text-lg font-light text-emerald-950 dark:text-emerald-100 font-mono mt-0.5">
               {gridExportVal} kW
             </p>
           </div>
-          <div className="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg">
+          <div className="p-2 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 rounded-xl">
             <ArrowUpRight className="w-4 h-4" />
           </div>
         </div>
 
         {/* 4. Critical Load (124 kW) */}
-        <div className="p-3.5 rounded-xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40 flex items-center justify-between">
+        <div className="p-3.5 rounded-2xl bg-rose-500/10 dark:bg-rose-950/40 border border-rose-200/50 dark:border-rose-800/40 backdrop-blur-md flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
               Critical Load
             </span>
-            <p className="text-lg font-extrabold text-rose-950 dark:text-rose-100 font-mono mt-0.5">
+            <p className="text-lg font-light text-rose-950 dark:text-rose-100 font-mono mt-0.5">
               {criticalLoadVal} kW
             </p>
           </div>
-          <div className="p-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg">
+          <div className="p-2 bg-rose-500/15 text-rose-600 dark:text-rose-400 rounded-xl">
             <ShieldAlert className="w-4 h-4" />
           </div>
         </div>
@@ -291,32 +291,32 @@ export function SankeyDiagramContent({ flows }: SankeyDiagramProps) {
 
 function TableFallback({ solar, wind, gridImport, gridExport, baseLoad, criticalLoad }: any) {
   return (
-    <div className="p-4 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 text-xs space-y-3">
+    <div className="p-4 border border-white/20 dark:border-white/10 rounded-2xl bg-white/40 dark:bg-white/5 text-xs space-y-3">
       <h4 className="font-bold text-zinc-700 dark:text-zinc-300">Live Power Flow Matrix</h4>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
         <div className="p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20">
           <span className="text-[10px] uppercase font-bold text-[#f5a623] block">Solar Yield</span>
-          <strong className="text-sm text-zinc-900 dark:text-zinc-100">{solar} kW</strong>
+          <strong className="text-sm text-zinc-900 dark:text-zinc-100 font-mono">{solar} kW</strong>
         </div>
         <div className="p-2.5 bg-teal-500/10 rounded-xl border border-teal-500/20">
           <span className="text-[10px] uppercase font-bold text-[#14b8a6] block">Wind Power</span>
-          <strong className="text-sm text-zinc-900 dark:text-zinc-100">{wind} kW</strong>
+          <strong className="text-sm text-zinc-900 dark:text-zinc-100 font-mono">{wind} kW</strong>
         </div>
         <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20">
           <span className="text-[10px] uppercase font-bold text-[#3b82f6] block">Grid Import</span>
-          <strong className="text-sm text-zinc-900 dark:text-zinc-100">{gridImport} kW</strong>
+          <strong className="text-sm text-zinc-900 dark:text-zinc-100 font-mono">{gridImport} kW</strong>
         </div>
         <div className="p-2.5 bg-purple-500/10 rounded-xl border border-purple-500/20">
           <span className="text-[10px] uppercase font-bold text-purple-500 block">Base Load</span>
-          <strong className="text-sm text-zinc-900 dark:text-zinc-100">{baseLoad} kW</strong>
+          <strong className="text-sm text-zinc-900 dark:text-zinc-100 font-mono">{baseLoad} kW</strong>
         </div>
         <div className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
           <span className="text-[10px] uppercase font-bold text-[#22c55e] block">Grid Export</span>
-          <strong className="text-sm text-zinc-900 dark:text-zinc-100">{gridExport} kW</strong>
+          <strong className="text-sm text-zinc-900 dark:text-zinc-100 font-mono">{gridExport} kW</strong>
         </div>
         <div className="p-2.5 bg-rose-500/10 rounded-xl border border-rose-500/20">
           <span className="text-[10px] uppercase font-bold text-rose-500 block">Critical Load</span>
-          <strong className="text-sm text-zinc-900 dark:text-zinc-100">{criticalLoad} kW</strong>
+          <strong className="text-sm text-zinc-900 dark:text-zinc-100 font-mono">{criticalLoad} kW</strong>
         </div>
       </div>
     </div>
@@ -325,15 +325,12 @@ function TableFallback({ solar, wind, gridImport, gridExport, baseLoad, critical
 
 export function SankeyDiagram(props: SankeyDiagramProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="p-4 sm:p-6 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800 rounded-2xl shadow-sm w-full"
-    >
-      <ChartErrorBoundary fallback={<TableFallback {...props.flows} />}>
-        <SankeyDiagramContent {...props} />
-      </ChartErrorBoundary>
-    </motion.div>
+    <TiltCard maxTilt={3} scale={1.01}>
+      <div className="p-5 sm:p-6 rounded-3xl bg-white/50 dark:bg-white/[0.04] backdrop-blur-2xl border border-white/30 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] w-full">
+        <ChartErrorBoundary fallback={<TableFallback {...props.flows} />}>
+          <SankeyDiagramContent {...props} />
+        </ChartErrorBoundary>
+      </div>
+    </TiltCard>
   );
 }
