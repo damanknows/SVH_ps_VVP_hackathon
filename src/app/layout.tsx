@@ -1,31 +1,20 @@
-'use client';
-
-import React, { useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from 'next-themes';
-import { Toaster } from 'sonner';
+﻿import type { Metadata } from 'next';
+import React from 'react';
 import { Header } from '@/components/layout/Header';
-import { LiveDataProvider } from '@/hooks/useLiveData';
+import Providers from './Providers';
 import './globals.css';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 1000 * 60 * 5,
-            refetchOnWindowFocus: false,
-            retry: 1,
-          },
-        },
-      })
-  );
+export const metadata: Metadata = {
+  title: 'SuryaVayu VPP | Energy Management | Govt. of Rajasthan DTE',
+  description:
+    'Energy Management & Virtual Power Plant Control Cell — Directorate of Technical Education, Government of Rajasthan',
+};
 
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Google Fonts: Inter + Playfair Display (Serif) + IBM Plex Sans + Space Mono (Editorial Kinfolk) */}
+        {/* Google Fonts: Inter + Playfair Display + IBM Plex Sans + Space Mono */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -33,33 +22,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-        <title>SuryaVayu VPP · Energy Management · Govt. of Rajasthan DTE</title>
-        <meta
-          name="description"
-          content="Energy Management & Virtual Power Plant Control Cell — Directorate of Technical Education, Government of Rajasthan"
-        />
       </head>
       <body className="flex flex-col min-h-dvh">
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-            <LiveDataProvider>
-              {/* ── Sticky Government Header ── */}
-              <Header />
+        <Providers>
+          {/* Sticky Government Header */}
+          <Header />
 
-              {/* ── Page Children (Sidebar lives inside page.tsx) ── */}
-              {children}
-
-              {/* ── Global Toast Notifications ── */}
-              <Toaster
-                position="bottom-right"
-                toastOptions={{
-                  className:
-                    'text-xs font-semibold rounded-xl border border-[hsl(var(--border))] shadow-xl',
-                }}
-              />
-            </LiveDataProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
+          {/* Page Children (Sidebar lives inside page.tsx) */}
+          {children}
+        </Providers>
       </body>
     </html>
   );
