@@ -101,6 +101,16 @@ export function Header() {
               </span>
             </div>
 
+            {/* Quiet Luxury Kinfolk SCADA Switcher */}
+            <a
+              href="/editorial"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 text-[11px] font-bold transition-all shadow-xs"
+              title="Switch to Kinfolk SCADA Quiet Luxury Editorial View"
+            >
+              <span>Kinfolk SCADA</span>
+              <span className="text-[9px] bg-amber-400 text-amber-950 px-1 rounded font-mono">NEW</span>
+            </a>
+
             {/* Theme Toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

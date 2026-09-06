@@ -113,6 +113,26 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
             </motion.button>
           );
         })}
+
+        {/* ── Kinfolk SCADA Quiet Luxury Link ── */}
+        <div className="pt-2">
+          <a
+            href="/editorial"
+            className="w-full text-left flex items-center gap-3 px-3 py-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-200 transition-all group shadow-xs backdrop-blur-md"
+          >
+            <span className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/20 text-amber-600 dark:text-amber-300 font-editorial-serif font-bold text-sm">
+              K
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs font-bold leading-tight tracking-tight truncate">Kinfolk SCADA</p>
+                <span className="text-[9px] bg-[#C65D3A] text-white px-1 rounded font-mono font-bold">LUX</span>
+              </div>
+              <p className="text-[10px] opacity-70 truncate mt-0.5">Quiet luxury editorial view</p>
+            </div>
+            <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-40 group-hover:opacity-100 transform group-hover:translate-x-0.5 transition-all" />
+          </a>
+        </div>
       </div>
 
       {/* ── Frosted Glass System Status Card ──────────────────────── */}
