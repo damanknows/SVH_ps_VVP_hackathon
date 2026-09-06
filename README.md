@@ -236,6 +236,7 @@ docker run -d -p 3000:3000 --name suryavayu-app suryavayu-vpp
    - Add `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WS_URL` in the Vercel Project Settings.
 4. **Deploy:**
    - Click **Deploy**. Vercel will automatically build and serve the optimized standalone Next.js application.
+   - Working Link-https://gage-guru-mph-sofa.trycloudflare.com/
 
 ---
 
