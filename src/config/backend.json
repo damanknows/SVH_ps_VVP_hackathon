@@ -1,0 +1,38 @@
+{
+  "name": "SuryaVayu VPP Backend Configuration",
+  "version": "1.0.0",
+  "environment": "production",
+  "server": {
+    "httpUrl": "http://localhost:8000",
+    "wsUrl": "ws://localhost:8000/ws/live",
+    "productionHttpUrl": "https://suryavayu-vpp-backend.onrender.com",
+    "productionWsUrl": "wss://suryavayu-vpp-backend.onrender.com/ws/live"
+  },
+  "endpoints": {
+    "liveTelemetryWs": "/ws/live",
+    "simulate": "/api/simulate",
+    "actionExecute": "/api/actions/execute",
+    "forecast": "/api/forecast",
+    "health": "/health"
+  },
+  "websocket": {
+    "reconnect": {
+      "initialDelayMs": 1000,
+      "maxDelayMs": 30000,
+      "backoffMultiplier": 2.0,
+      "maxAttempts": 10
+    },
+    "heartbeatIntervalMs": 15000,
+    "latencyThresholdMs": 200
+  },
+  "microgrid": {
+    "defaultId": "SV-VPP-01",
+    "state": "Rajasthan",
+    "discom": "JVVNL / JdVVNL / AVVNL",
+    "protocol": "Raw JSON WS / Modbus TCP"
+  },
+  "fallback": {
+    "enableStandaloneMock": true,
+    "mockTickIntervalMs": 3000
+  }
+}

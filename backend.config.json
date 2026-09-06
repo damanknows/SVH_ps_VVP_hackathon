@@ -1,0 +1,17 @@
+{
+  "name": "SuryaVayu VPP Backend Configuration",
+  "version": "1.0.0",
+  "server": {
+    "httpUrl": "http://localhost:8000",
+    "wsUrl": "ws://localhost:8000/ws/live",
+    "productionHttpUrl": "https://suryavayu-vpp-backend.onrender.com",
+    "productionWsUrl": "wss://suryavayu-vpp-backend.onrender.com/ws/live"
+  },
+  "endpoints": {
+    "liveTelemetryWs": "/ws/live",
+    "simulate": "/api/simulate",
+    "actionExecute": "/api/actions/execute",
+    "forecast": "/api/forecast",
+    "health": "/health"
+  }
+}

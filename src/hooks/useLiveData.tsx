@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useReducer, useCallback, u
 import { WSMessageSchema, TelemetrySchema, ActionPlanSchema } from '@/lib/validations';
 import { Telemetry, ActionPlan, ActionItem, Campus } from '@/types';
 import { mockTelemetry, mockActions, demoScenarios, CAMPUSES, getTelemetryForCampus } from '@/lib/mockData';
+import backendConfig from '@/config/backend.json';
 
 export interface AlertItem {
   id: string;
@@ -202,7 +203,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    let wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+    let wsUrl = process.env.NEXT_PUBLIC_WS_URL || backendConfig.server.wsUrl;
     if (!wsUrl && typeof window !== 'undefined') {
       const isHttps = window.location.protocol === 'https:';
       const proto = isHttps ? 'wss:' : 'ws:';
