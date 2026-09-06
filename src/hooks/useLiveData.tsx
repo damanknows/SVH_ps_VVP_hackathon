@@ -285,36 +285,36 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       const t0 = performance.now();
 
       const socDelta = (Math.random() - 0.48) * 0.4;
-      const currentSoc = state.telemetry.socPct;
+      const currentSoc = cur.socPct;
       const newSoc = Math.min(100, Math.max(10, +(currentSoc + socDelta).toFixed(1)));
 
-      const solarVal = Math.round(Math.max(0, state.telemetry.flowsKw.solar + (Math.random() - 0.5) * 12));
-      const windVal = Math.round(Math.max(0, state.telemetry.flowsKw.wind + (Math.random() - 0.5) * 6));
-      const loadVal = Math.round(Math.max(120, state.telemetry.flowsKw.load + (Math.random() - 0.5) * 8));
+      const solarVal = Math.round(Math.max(0, cur.flowsKw.solar + (Math.random() - 0.5) * 12));
+      const windVal = Math.round(Math.max(0, cur.flowsKw.wind + (Math.random() - 0.5) * 6));
+      const loadVal = Math.round(Math.max(120, cur.flowsKw.load + (Math.random() - 0.5) * 8));
       const exportVal = Math.max(0, (solarVal + windVal) - loadVal);
 
       const updatedTelemetry: Telemetry = {
-        ...state.telemetry,
+        ...cur,
         timestamp: new Date().toISOString(),
         socPct: newSoc,
         flowsKw: {
-          ...state.telemetry.flowsKw,
+          ...cur.flowsKw,
           solar: solarVal,
           wind: windVal,
           load: loadVal,
           critical_load: Math.round(loadVal * 0.38),
           export: exportVal,
         },
-        savingsPerHour: Math.round(state.telemetry.savingsPerHour + (Math.random() - 0.5) * 30),
+        savingsPerHour: Math.round(cur.savingsPerHour + (Math.random() - 0.5) * 30),
         activeGenKw: solarVal + windVal,
-        totalGenKw: state.telemetry.totalGenKw || 457,
+        totalGenKw: cur.totalGenKw || 457,
       };
 
       dispatch({ type: 'SET_TELEMETRY', payload: updatedTelemetry });
       const elapsed = +(performance.now() - t0).toFixed(1);
       dispatch({ type: 'SET_LATENCY', payload: Math.max(6, Math.min(35, elapsed)) });
     }, 3000);
-  }, [state.telemetry]);
+  }, []);
 
   const connectWebSocket = useCallback(() => {
     if (isUnmountedRef.current) return;

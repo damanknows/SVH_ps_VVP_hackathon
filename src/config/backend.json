@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "environment": "production",
   "server": {
-    "httpUrl": "http://localhost:8000",
-    "wsUrl": "ws://localhost:8000/ws/live",
-    "productionHttpUrl": "https://suryavayu-vpp-backend.onrender.com",
-    "productionWsUrl": "wss://suryavayu-vpp-backend.onrender.com/ws/live"
+    "httpUrl": "",
+    "wsUrl": "/ws/live",
+    "productionHttpUrl": "",
+    "productionWsUrl": "/ws/live"
   },
   "endpoints": {
     "liveTelemetryWs": "/ws/live",
