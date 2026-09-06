@@ -134,6 +134,56 @@ def test_worst_case_check_and_conservative_charge(opt, diurnal_profiles):
         assert adjusted["p_bat_ch"][0] >= plan["p_bat_ch"][0]
 
 
+def test_worst_case_check_does_not_mutate_caller_plan(opt, diurnal_profiles):
+    """
+    Regression test: check_worst_case() used to do `dict(planned_schedule)`,
+    which is only a SHALLOW copy — the underlying lists (p_bat_ch, p_bat_dis,
+    p_grid_imp, p_grid_exp, soc) were the same list objects as the caller's
+    original plan. In-place edits like `adjusted["p_bat_dis"][0] = 0.0` then
+    silently corrupted `plan` itself.
+
+    It also exercises the corrected worst-case criterion: with solar forced to
+    zero (P10) at a high-demand hour, the grid import required to keep the
+    power balance satisfied for the (unchanged) planned battery setpoints must
+    exceed the grid's import capacity, which should trigger `is_breached`.
+    Previously the check replayed the fixed battery SoC trajectory and clipped
+    it to [0, b_cap] — a bound the LP-produced schedule already satisfies by
+    construction — so it could essentially never flag a breach regardless of
+    how bad p10_solar_kw was.
+    """
+    solar, wind, demand = diurnal_profiles
+    plan = opt.solve(solar, wind, demand, initial_soc=150.0)
+
+    original_p_bat_dis = list(plan["p_bat_dis"])
+    original_p_bat_ch = list(plan["p_bat_ch"])
+    original_p_grid_imp = list(plan["p_grid_imp"])
+
+    # Zero solar and zero wind all day, against the unchanged planned
+    # schedule, forces required grid import well past p_imp_max somewhere
+    # in the horizon (demand alone reaches ~225 kW, comfortably under the
+    # 500 kW cap on its own — so also slash the import cap for this test via
+    # a throwaway optimizer instance sharing config, to make the breach
+    # deterministic without depending on demand magnitude).
+    opt.p_imp_max = 50.0  # temporarily tighten grid import capacity for this test
+    try:
+        p10_solar = solar * 0.0
+        zero_wind = wind * 0.0
+        breached, adjusted = opt.check_worst_case(plan, p10_solar, zero_wind, demand, initial_soc=150.0)
+    finally:
+        opt.p_imp_max = 500.0  # restore
+
+    assert breached is True, "Test setup should force a worst-case grid-import breach"
+
+    # adjusted is allowed (expected) to differ from plan at t=0 ...
+    assert adjusted["p_bat_dis"][0] == 0.0
+    # ... but the caller's original `plan` dict must be completely untouched.
+    assert plan["p_bat_dis"] == original_p_bat_dis
+    assert plan["p_bat_ch"] == original_p_bat_ch
+    assert plan["p_grid_imp"] == original_p_grid_imp
+    assert adjusted["p_bat_ch"] is not plan["p_bat_ch"]
+    assert adjusted["p_bat_dis"] is not plan["p_bat_dis"]
+
+
 def test_benchmark_dispatch_savings(opt, diurnal_profiles):
     solar, wind, demand = diurnal_profiles
     res = opt.benchmark_dispatch_savings(solar, wind, demand, initial_soc=150.0, start_hour=0)

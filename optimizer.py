@@ -249,12 +249,15 @@ class VppOptimizer:
                     "solve_time_ms": elapsed_ms,
                 }
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            # An exception here (bad input shapes, solver crash, etc.) is a
+            # different failure mode than a clean "infeasible" LP result and
+            # should not be silently treated the same way — log it so bugs
+            # don't masquerade as ordinary infeasibility.
             elapsed_ms = (time.perf_counter() - t_start) * 1000.0
+            print(f"[VppOptimizer.solve] Unexpected exception during solve: {e!r}")
             return {
                 "status": "error",
-                "termination_condition": f"Exception: {e}",
+                "termination_condition": f"Error: {e}",
                 "solve_time_ms": elapsed_ms,
             }
 
@@ -302,8 +305,29 @@ class VppOptimizer:
         try:
             slack_res = self.solver.solve(model)
             self.solver.load_vars()
-        except Exception:
-            pass
+        except Exception as e:
+            elapsed_ms = (time.perf_counter() - t_start) * 1000.0
+            print(f"[VppOptimizer.safe_solve] Emergency slack solve raised: {e!r}")
+            return {
+                "status": "error",
+                "termination_condition": f"Emergency solve error: {e}",
+                "solve_time_ms": elapsed_ms,
+                "is_emergency_plan": True,
+            }
+
+        if slack_res.termination_condition != appsi.base.TerminationCondition.optimal:
+            elapsed_ms = (time.perf_counter() - t_start) * 1000.0
+            print(
+                f"[VppOptimizer.safe_solve] Emergency slack solve did not reach "
+                f"optimality: {slack_res.termination_condition}"
+            )
+            return {
+                "status": "error",
+                "termination_condition": str(slack_res.termination_condition),
+                "solve_time_ms": elapsed_ms,
+                "is_emergency_plan": True,
+            }
+
         elapsed_ms = (time.perf_counter() - t_start) * 1000.0
 
         p_ch = [float(pyo.value(model.P_bat_ch[t])) for t in model.T]
@@ -337,30 +361,47 @@ class VppOptimizer:
     ) -> Tuple[bool, Dict[str, Any]]:
         """
         Stress-tests the planned dispatch against pessimistic P10 solar generation.
-        If SoC breaches reserve margin in >10% of timesteps, forces a conservative
-        charge boost in timestep t=0.
+
+        The planned battery charge/discharge setpoints (p_bat_ch, p_bat_dis) are
+        already fixed by the LP solve and do not physically change if actual
+        solar comes in lower than forecast — the battery only follows its
+        setpoints. What DOES change under a solar shortfall is how much extra
+        power the grid connection must supply to keep the power-balance
+        equation satisfied at that timestep. So the correct worst-case check is
+        whether the grid import required to cover (demand + charge - P10 solar
+        - wind - export) would exceed the physical grid import limit
+        (p_imp_max) at any timestep — NOT whether replaying the fixed battery
+        trajectory dips below the reserve margin (it structurally can't, since
+        the LP already enforced that bound on the very same numbers).
         """
         N = len(demand_kw)
         p_ch = list(planned_schedule["p_bat_ch"])
         p_dis = list(planned_schedule["p_bat_dis"])
+        p_exp = list(planned_schedule.get("p_grid_exp", [0.0] * N))
 
-        # Simulate forward SoC under P10 solar
-        soc_sim = []
-        curr_soc = initial_soc
+        required_import_p10 = []
         breach_count = 0
-
         for t in range(N):
-            # Under reduced solar, deficit is higher
-            net_flow = (self.eta_ch * p_ch[t] - (1.0 / self.eta_dis) * p_dis[t]) * self.dt_h
-            curr_soc = np.clip(curr_soc + net_flow, 0.0, self.b_cap)
-            soc_sim.append(curr_soc)
-            if curr_soc < self.soc_min:
+            gen_t = float(p10_solar_kw[t]) + float(wind_kw[t])
+            # Grid import needed at t so that: gen + P_dis + P_imp == demand + P_ch + P_exp
+            needed_imp = demand_kw[t] + p_ch[t] + p_exp[t] - gen_t - p_dis[t]
+            needed_imp = max(0.0, needed_imp)
+            required_import_p10.append(needed_imp)
+            if needed_imp > self.p_imp_max:
                 breach_count += 1
 
         breach_ratio = breach_count / N
-        is_breached = breach_ratio > 0.10  # >10% of timesteps
+        is_breached = breach_ratio > 0.10  # >10% of timesteps would exceed grid import capacity
 
+        # NOTE: dict(planned_schedule) is only a SHALLOW copy — the list values
+        # (p_bat_ch, p_bat_dis, p_grid_imp, p_grid_exp, soc) are still the SAME
+        # list objects as in planned_schedule. Mutating them in place here would
+        # silently corrupt the caller's original plan. Rebuild fresh lists for
+        # every field we might touch so adjusted_schedule is fully independent.
         adjusted_schedule = dict(planned_schedule)
+        for key in ("p_bat_ch", "p_bat_dis", "p_grid_imp", "p_grid_exp", "soc"):
+            if key in adjusted_schedule:
+                adjusted_schedule[key] = list(adjusted_schedule[key])
         adjusted_schedule["worst_case_flagged"] = is_breached
 
         if is_breached:
@@ -469,6 +510,15 @@ class VppOptimizer:
         optimal = self.safe_solve(solar_arr, wind_arr, demand_arr, initial_soc, start_hour)
 
         greedy_cost = greedy["total_cost_inr"]
+        if optimal.get("status") == "error" or "total_cost_inr" not in optimal:
+            # Both the primary and emergency solves failed outright (not just
+            # infeasible) — fall back to the greedy baseline itself so callers
+            # always get a usable, non-crashing schedule instead of a KeyError.
+            print("[VppOptimizer.benchmark_dispatch_savings] Optimizer solve failed entirely; using greedy baseline as the returned plan.")
+            optimal = dict(greedy)
+            optimal["status"] = "error"
+            optimal["is_emergency_plan"] = True
+            optimal["solve_time_ms"] = optimal.get("solve_time_ms", 0.0)
         opt_cost = optimal["total_cost_inr"]
         savings = max(0.0, greedy_cost - opt_cost)
         savings_pct = round((savings / max(greedy_cost, 1.0)) * 100.0, 2)

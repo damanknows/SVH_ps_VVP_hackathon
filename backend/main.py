@@ -113,9 +113,14 @@ def get_current_telemetry(event: Optional[str] = Query(None, description="DEMO_S
     """
     Retrieves real-time physically grounded microgrid telemetry from simulator.py.
     """
-    rng = np.random.default_rng(42)
-    # Generate live telemetry using trainee/simulator.py
-    sim_data = simulator.generate_telemetry(rng=rng)
+    # NOTE: previously called np.random.seed(42) here. That mutated GLOBAL
+    # numpy RNG state on every request (a race condition under concurrent
+    # requests / other numpy-based code such as the ONNX forecast engine),
+    # and it didn't even do what it looked like it did: simulator.py uses
+    # stdlib `random`, not numpy, so the seed had no effect on the values
+    # below. Removed rather than "fixed" — there is nothing here that
+    # actually needs deterministic randomness.
+    sim_data = simulator.generate_telemetry()
     now_str = sim_data.get("timestamp", datetime.now().isoformat())
 
     solar_val = float(sim_data.get("solar_kw", 0.0))
@@ -309,7 +314,9 @@ def trigger_demo_scenario(request: DemoScenarioRequest):
     (heatwave, wind_drought, storm, monsoon, cloud_cover, tariff_spike)
     reusing scenario definitions from generate.py with reproducible seeds.
     """
-    np.random.seed(42)
+    # NOTE: previously called np.random.seed(42) here too. generate_probabilistic_forecast()
+    # is a deterministic diurnal profile plus an ONNX forward pass — no randomness
+    # involved — so the seed call was another no-op global-state mutation. Removed.
     engine: ForecastEngine = app_state["engine"]
     optimizer: VppOptimizer = app_state["optimizer"]
     explainer: DispatchExplainer = app_state["explainer"]
@@ -358,17 +365,27 @@ def trigger_demo_scenario(request: DemoScenarioRequest):
             detail=f"Unknown scenario '{request.name}'. Supported: heatwave, wind_drought, storm, monsoon, cloud_cover, tariff_spike",
         )
 
-    # Custom parameter overrides if provided
+    # Custom parameter overrides if provided. Bounds-check user-supplied
+    # multipliers before they reach the optimizer/solver — an unbounded or
+    # negative factor here can produce nonsensical or pathologically
+    # slow-to-solve inputs.
+    def _bounded_factor(key: str, default: float = 1.0, lo: float = 0.0, hi: float = 5.0) -> float:
+        if key not in override:
+            return default
+        try:
+            val = float(override[key])
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail=f"'{key}' override must be a number.")
+        if not (lo <= val <= hi):
+            raise HTTPException(status_code=422, detail=f"'{key}' override must be between {lo} and {hi}.")
+        return val
+
+    solar_factor = _bounded_factor("solar_factor")
+    demand_factor = _bounded_factor("demand_factor")
     if "solar_factor" in override:
-        val = float(override["solar_factor"])
-        if val < 0.0 or val > 5.0:
-            raise HTTPException(status_code=422, detail="solar_factor must be between 0.0 and 5.0")
-        solar = np.clip(solar * val, 0.0, 200.0)
+        solar = np.clip(solar * solar_factor, 0.0, 200.0)
     if "demand_factor" in override:
-        val = float(override["demand_factor"])
-        if val < 0.0 or val > 5.0:
-            raise HTTPException(status_code=422, detail="demand_factor must be between 0.0 and 5.0")
-        demand = demand * val
+        demand = demand * demand_factor
 
     plan = optimizer.safe_solve(solar, wind, demand, initial_soc=150.0, start_hour=datetime.now().hour)
     benchmark = optimizer.benchmark_dispatch_savings(solar, wind, demand, initial_soc=150.0)

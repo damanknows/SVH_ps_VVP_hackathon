@@ -48,11 +48,8 @@ def get_current_weather_safe():
     return _cached_weather
 
 
-def generate_telemetry(rng=None):
-    \"\"\"Generates physically grounded real-time telemetry.\"\"\"
-    if rng is None:
-        rng = np.random.default_rng()
-        
+def generate_telemetry():
+    """Generates physically grounded real-time telemetry."""
     global battery_soc
     now = datetime.now()
     ts = pd.Timestamp(now).tz_localize("Asia/Kolkata") if pd.Timestamp(now).tz is None else pd.Timestamp(now)
@@ -81,9 +78,9 @@ def generate_telemetry(rng=None):
     )
 
     # Realistic micro-fluctuations (sensor jitter / small cloud passage / gust turbulence)
-    solar_actual = max(0.0, round(solar_base + (rng.uniform(-2.0, 2.0) if solar_base > 0 else 0.0), 1))
-    wind_actual = max(0.0, round(wind_base + rng.uniform(-1.5, 1.5), 1))
-    load_actual = max(70.0, round(load_base + rng.uniform(-3.0, 3.0), 1))
+    solar_actual = max(0.0, round(solar_base + (random.uniform(-2.0, 2.0) if solar_base > 0 else 0.0), 1))
+    wind_actual = max(0.0, round(wind_base + random.uniform(-1.5, 1.5), 1))
+    load_actual = max(70.0, round(load_base + random.uniform(-3.0, 3.0), 1))
 
     # Closed-loop Battery State of Charge (SoC) Dynamics
     # Net generation surplus charges battery; deficit discharges battery
