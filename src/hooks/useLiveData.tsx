@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useReducer, useCallback, useRef, type ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useReducer, useCallback, useRef, useState, type ReactNode } from 'react';
 import { WSMessageSchema, TelemetrySchema, ActionPlanSchema } from '@/lib/validations';
 import { Telemetry, ActionPlan, ActionItem, Campus } from '@/types';
 import { mockTelemetry, mockActions, demoScenarios, CAMPUSES, getTelemetryForCampus } from '@/lib/mockData';
@@ -26,6 +26,7 @@ export interface LiveState {
   activeScenario: string;
   activeCampusId: string;
   activeCampus: Campus;
+  resolvedWsUrl: string;
 }
 
 type LiveAction =
@@ -36,7 +37,8 @@ type LiveAction =
   | { type: 'SET_RECONNECTING'; payload: { isReconnecting: boolean; attempt: number; delaySec: number } }
   | { type: 'SET_LATENCY'; payload: number }
   | { type: 'SET_SCENARIO'; payload: string }
-  | { type: 'SET_CAMPUS'; payload: string };
+  | { type: 'SET_CAMPUS'; payload: string }
+  | { type: 'SET_WS_URL'; payload: string };
 
 function liveReducer(state: LiveState, action: LiveAction): LiveState {
   switch (action.type) {
@@ -68,18 +70,42 @@ function liveReducer(state: LiveState, action: LiveAction): LiveState {
     case 'SET_LATENCY':
       return { ...state, latencyMs: action.payload };
 
+    case 'SET_WS_URL':
+      return { ...state, resolvedWsUrl: action.payload };
+
     case 'SET_SCENARIO': {
-      const scenarioData = demoScenarios[action.payload];
-      if (!scenarioData) return state;
+      const scenarioKey = action.payload;
+      const scenario = (demoScenarios as any)[scenarioKey];
+      if (!scenario) return state;
+
+      const newTelemetry: Telemetry = {
+        ...state.telemetry,
+        timestamp: new Date().toISOString(),
+        socPct: scenario.socPct ?? state.telemetry.socPct,
+        flowsKw: {
+          ...state.telemetry.flowsKw,
+          solar: scenario.solar ?? state.telemetry.flowsKw.solar,
+          wind: scenario.wind ?? state.telemetry.flowsKw.wind,
+          load: scenario.load ?? state.telemetry.flowsKw.load,
+          critical_load: scenario.criticalLoad ?? state.telemetry.flowsKw.critical_load,
+          export: scenario.export ?? state.telemetry.flowsKw.export,
+          grid: scenario.grid ?? state.telemetry.flowsKw.grid,
+        },
+        gridStatus: scenario.gridStatus ?? state.telemetry.gridStatus,
+        autonomyPct: scenario.autonomyPct ?? state.telemetry.autonomyPct,
+        savingsPerHour: scenario.savingsPerHour ?? state.telemetry.savingsPerHour,
+        activeGenKw: (scenario.solar ?? state.telemetry.flowsKw.solar) + (scenario.wind ?? state.telemetry.flowsKw.wind),
+      };
+
       return {
         ...state,
-        activeScenario: action.payload,
-        telemetry: { ...scenarioData, timestamp: new Date().toISOString() },
+        activeScenario: scenarioKey,
+        telemetry: newTelemetry,
         alerts: [
           {
             id: Math.random().toString(36).substring(2, 9),
             level: 'info' as const,
-            message: `Switched demo scenario to '${action.payload}'`,
+            message: `Applied Scenario: ${scenario.name}`,
             timestamp: new Date().toISOString(),
           },
           ...state.alerts,
@@ -88,14 +114,20 @@ function liveReducer(state: LiveState, action: LiveAction): LiveState {
     }
 
     case 'SET_CAMPUS': {
-      const campus = CAMPUSES.find((c) => c.id === action.payload) ?? CAMPUSES[0];
-      const newTelemetry = getTelemetryForCampus(campus.id);
+      const campusId = action.payload;
+      const campus = CAMPUSES.find((c) => c.id === campusId);
+      if (!campus) return state;
+
+      const campusTelemetry = getTelemetryForCampus(campusId);
       return {
         ...state,
-        activeCampusId: campus.id,
+        activeCampusId: campusId,
         activeCampus: campus,
-        telemetry: newTelemetry,
-        activeScenario: 'default',
+        telemetry: {
+          ...state.telemetry,
+          ...campusTelemetry,
+          timestamp: new Date().toISOString(),
+        },
         alerts: [
           {
             id: Math.random().toString(36).substring(2, 9),
@@ -118,6 +150,7 @@ export interface LiveDataContextType extends LiveState {
   setCampus: (campusId: string) => void;
   triggerManualAction: (action: ActionItem) => void;
   reconnectNow: () => void;
+  setCustomWsUrl: (url: string) => void;
 }
 
 const LiveDataContext = createContext<LiveDataContextType | null>(null);
@@ -126,6 +159,34 @@ const initialActionPlan: ActionPlan = {
   generatedAt: new Date().toISOString(),
   actions: mockActions,
 };
+
+// ── Smart Dynamic WebSocket URL Resolver with Mixed Content Protection ──────
+function sanitizeAndUpgradeWsUrl(rawUrl: string): string {
+  let url = rawUrl.trim();
+  if (!url) return '';
+
+  // Auto-convert HTTP(S) URLs to WS(S)
+  if (url.startsWith('https://')) {
+    url = url.replace('https://', 'wss://');
+  } else if (url.startsWith('http://')) {
+    url = url.replace('http://', 'ws://');
+  }
+
+  // Ensure /ws/live endpoint path
+  if (!url.includes('/ws/')) {
+    url = url.replace(/\/+$/, '') + '/ws/live';
+  }
+
+  // Mixed Content Protection: If page is loaded over HTTPS, MUST use WSS
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+    if (url.startsWith('ws://')) {
+      console.warn('[VPP Security] Upgrading ws:// to wss:// to prevent browser mixed-content block:', url);
+      url = url.replace('ws://', 'wss://');
+    }
+  }
+
+  return url;
+}
 
 export function LiveDataProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(liveReducer, {
@@ -148,6 +209,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     activeScenario: 'default',
     activeCampusId: CAMPUSES[0].id,
     activeCampus: CAMPUSES[0],
+    resolvedWsUrl: '',
   });
 
   const socketRef = useRef<WebSocket | null>(null);
@@ -156,7 +218,64 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
   const retryMsRef = useRef<number>(1000);
   const attemptCountRef = useRef<number>(0);
   const isUnmountedRef = useRef<boolean>(false);
-  const connectRef = useRef<() => void>(() => {});
+  const [customWsUrl, setCustomWsUrlState] = useState<string>('');
+
+  // Determine current active WebSocket URL
+  const resolveCurrentWsUrl = useCallback(() => {
+    if (typeof window === 'undefined') return 'ws://localhost:8000/ws/live';
+
+    // 1. URL search parameter override: ?ws=wss://xyz.trycloudflare.com
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryWs = searchParams.get('ws');
+    if (queryWs) {
+      return sanitizeAndUpgradeWsUrl(queryWs);
+    }
+
+    // 2. User custom URL saved in localStorage / state
+    const savedCustom = customWsUrl || localStorage.getItem('vpp_custom_ws_url');
+    if (savedCustom) {
+      return sanitizeAndUpgradeWsUrl(savedCustom);
+    }
+
+    // 3. Environment variable (if baked)
+    if (process.env.NEXT_PUBLIC_WS_URL) {
+      return sanitizeAndUpgradeWsUrl(process.env.NEXT_PUBLIC_WS_URL);
+    }
+
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isHttps = window.location.protocol === 'https:';
+
+    if (isLocalhost && !isHttps) {
+      return sanitizeAndUpgradeWsUrl(backendConfig.server.wsUrl || 'ws://localhost:8000/ws/live');
+    }
+
+    // 4. Public deployment default
+    if (backendConfig.server.productionWsUrl) {
+      return sanitizeAndUpgradeWsUrl(backendConfig.server.productionWsUrl);
+    }
+
+    // 5. Relative host upgrade
+    const proto = isHttps ? 'wss:' : 'ws:';
+    return `${proto}//${window.location.host}/ws/live`;
+  }, [customWsUrl]);
+
+  // Set custom WebSocket URL and reconnect immediately
+  const setCustomWsUrl = useCallback((url: string) => {
+    if (typeof window !== 'undefined') {
+      if (url.trim()) {
+        localStorage.setItem('vpp_custom_ws_url', url.trim());
+      } else {
+        localStorage.removeItem('vpp_custom_ws_url');
+      }
+    }
+    setCustomWsUrlState(url);
+    if (socketRef.current) {
+      socketRef.current.close();
+      socketRef.current = null;
+    }
+    retryMsRef.current = 1000;
+    attemptCountRef.current = 0;
+  }, []);
 
   // Fallback simulator to keep UI alive with realistic data if backend WS is offline
   const startFallbackSimulator = useCallback(() => {
@@ -164,7 +283,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
 
     fallbackIntervalRef.current = setInterval(() => {
       const t0 = performance.now();
-      
+
       const socDelta = (Math.random() - 0.48) * 0.4;
       const currentSoc = state.telemetry.socPct;
       const newSoc = Math.min(100, Math.max(10, +(currentSoc + socDelta).toFixed(1)));
@@ -203,15 +322,8 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    let wsUrl = process.env.NEXT_PUBLIC_WS_URL || backendConfig.server.wsUrl;
-    if (!wsUrl && typeof window !== 'undefined') {
-      const isHttps = window.location.protocol === 'https:';
-      const proto = isHttps ? 'wss:' : 'ws:';
-      wsUrl = `${proto}//${window.location.host}/ws/live`;
-    }
-    if (!wsUrl) {
-      wsUrl = 'ws://localhost:8000/ws/live';
-    }
+    const wsUrl = resolveCurrentWsUrl();
+    dispatch({ type: 'SET_WS_URL', payload: wsUrl });
 
     try {
       const ws = new WebSocket(wsUrl);
@@ -220,7 +332,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       ws.onopen = () => {
         if (isUnmountedRef.current) return;
         console.info('[VPP WebSocket] Connected successfully to:', wsUrl);
-        
+
         if (fallbackIntervalRef.current) {
           clearInterval(fallbackIntervalRef.current);
           fallbackIntervalRef.current = null;
@@ -248,12 +360,11 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       ws.onmessage = (event) => {
         const t0 = performance.now();
         try {
-          const rawData = JSON.parse(event.data);
+          const raw = JSON.parse(event.data);
+          const validated = WSMessageSchema.safeParse(raw);
 
-          // 1. Try validating as standard WSMessage schema
-          const parsedMsg = WSMessageSchema.safeParse(rawData);
-          if (parsedMsg.success) {
-            const msg = parsedMsg.data;
+          if (validated.success) {
+            const msg = validated.data;
             if (msg.type === 'telemetry') {
               dispatch({ type: 'SET_TELEMETRY', payload: msg.payload });
             } else if (msg.type === 'action_plan') {
@@ -263,79 +374,74 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
                 type: 'ADD_ALERT',
                 payload: {
                   id: Math.random().toString(36).substring(2, 9),
-                  level: msg.payload.level,
-                  message: msg.payload.message,
+                  level: msg.payload.level || 'info',
+                  message: msg.payload.message || 'System notification received.',
                   timestamp: new Date().toISOString(),
                 },
               });
             }
-          } else {
-            // 2. Direct TelemetrySchema payload fallback
-            const directTelemetry = TelemetrySchema.safeParse(rawData);
-            if (directTelemetry.success) {
-              dispatch({ type: 'SET_TELEMETRY', payload: directTelemetry.data });
-            } else {
-              // 3. Direct ActionPlanSchema fallback
-              const directActionPlan = ActionPlanSchema.safeParse(rawData);
-              if (directActionPlan.success) {
-                dispatch({ type: 'SET_ACTION_PLAN', payload: directActionPlan.data });
-              } else {
-                console.warn('[VPP WebSocket] Unrecognized payload schema:', rawData);
-              }
+          } else if (raw && raw.type) {
+            // Flexible fallback for raw backend payload schemas
+            const payloadData = raw.payload || raw.data;
+            if (raw.type === 'telemetry' && payloadData) {
+              dispatch({ type: 'SET_TELEMETRY', payload: payloadData });
+            } else if (raw.type === 'action_plan' && payloadData) {
+              dispatch({ type: 'SET_ACTION_PLAN', payload: payloadData });
             }
           }
 
-          // Latency performance monitoring (<200ms)
-          const latency = +(performance.now() - t0).toFixed(2);
-          if (latency > 200) {
-            console.warn(`[VPP Performance Warning] WS dispatch latency high: ${latency}ms (>200ms target)`);
-          } else {
-            console.debug(`[VPP Performance] WS message parsed & dispatched in ${latency}ms`);
+          const elapsed = +(performance.now() - t0).toFixed(1);
+          if (elapsed > 200) {
+            console.warn(`[VPP Perf Alert] WS message parse took ${elapsed}ms (>200ms threshold)`);
           }
-          dispatch({ type: 'SET_LATENCY', payload: Math.max(1, latency) });
+          dispatch({ type: 'SET_LATENCY', payload: elapsed });
         } catch (err) {
-          console.error('[VPP WebSocket] JSON parse error:', err);
+          console.error('[VPP WebSocket] Invalid JSON frame:', err);
         }
       };
 
       ws.onerror = () => {
-        if (isUnmountedRef.current) return;
-        startFallbackSimulator();
+        // Handled in onclose
       };
 
       ws.onclose = () => {
         if (isUnmountedRef.current) return;
         socketRef.current = null;
+        dispatch({ type: 'SET_CONNECTED', payload: { connected: false, isStandalone: true } });
+
+        startFallbackSimulator();
 
         attemptCountRef.current += 1;
-        const currentRetryMs = retryMsRef.current;
-        const delaySec = Math.round(currentRetryMs / 1000);
+        const delay = retryMsRef.current;
+        const delaySec = Math.round(delay / 1000);
 
-        dispatch({ type: 'SET_CONNECTED', payload: { connected: false, isStandalone: true } });
         dispatch({
           type: 'SET_RECONNECTING',
           payload: { isReconnecting: true, attempt: attemptCountRef.current, delaySec },
         });
 
-        startFallbackSimulator();
-
-        // Exponential backoff: 1s, 2s, 4s, 8s, 16s... capped at 30s
-        retryMsRef.current = Math.min(currentRetryMs * 2, 30000);
-
-        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = setTimeout(() => {
-          connectRef.current();
-        }, currentRetryMs);
+          retryMsRef.current = Math.min(retryMsRef.current * 2, 30000);
+          connectWebSocket();
+        }, delay);
       };
-    } catch {
+    } catch (e) {
+      console.warn('[VPP WebSocket] Error creating connection:', e);
       startFallbackSimulator();
     }
-  }, [startFallbackSimulator]);
-  connectRef.current = connectWebSocket;
+  }, [resolveCurrentWsUrl, startFallbackSimulator]);
 
   const reconnectNow = useCallback(() => {
-    if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    if (socketRef.current) {
+      socketRef.current.close();
+      socketRef.current = null;
+    }
     retryMsRef.current = 1000;
+    attemptCountRef.current = 0;
     connectWebSocket();
   }, [connectWebSocket]);
 
@@ -347,10 +453,13 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       isUnmountedRef.current = true;
       if (socketRef.current) {
         socketRef.current.close();
-        socketRef.current = null;
       }
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (fallbackIntervalRef.current) clearInterval(fallbackIntervalRef.current);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (fallbackIntervalRef.current) {
+        clearInterval(fallbackIntervalRef.current);
+      }
     };
   }, [connectWebSocket]);
 
@@ -367,32 +476,29 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       type: 'ADD_ALERT',
       payload: {
         id: Math.random().toString(36).substring(2, 9),
-        level: action.priority === 'HIGH' ? 'critical' : 'info',
-        message: `Action executed: ${action.title}`,
+        level: 'info',
+        message: `Dispatched Directive: ${action.title}`,
         timestamp: new Date().toISOString(),
       },
     });
   }, []);
 
-  return (
-    <LiveDataContext.Provider
-      value={{
-        ...state,
-        setScenario,
-        setCampus,
-        triggerManualAction,
-        reconnectNow,
-      }}
-    >
-      {children}
-    </LiveDataContext.Provider>
-  );
+  const contextValue: LiveDataContextType = {
+    ...state,
+    setScenario,
+    setCampus,
+    triggerManualAction,
+    reconnectNow,
+    setCustomWsUrl,
+  };
+
+  return <LiveDataContext.Provider value={contextValue}>{children}</LiveDataContext.Provider>;
 }
 
-export function useLiveData() {
+export function useLiveData(): LiveDataContextType {
   const ctx = useContext(LiveDataContext);
   if (!ctx) {
-    throw new Error('useLiveData must be used inside a LiveDataProvider');
+    throw new Error('useLiveData must be used within a LiveDataProvider');
   }
   return ctx;
 }

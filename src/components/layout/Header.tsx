@@ -8,7 +8,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function Header() {
   const { theme, setTheme } = useTheme();
-  const { connected, isStandalone, latencyMs, isReconnecting, reconnectAttempt, reconnectDelaySec, reconnectNow } = useLiveData();
+  const {
+    connected,
+    isStandalone,
+    latencyMs,
+    isReconnecting,
+    reconnectAttempt,
+    reconnectDelaySec,
+    reconnectNow,
+    resolvedWsUrl,
+    setCustomWsUrl,
+  } = useLiveData();
 
   /* Connection indicator colours */
   const statusColor = !connected
@@ -41,7 +51,7 @@ export function Header() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-amber-50 text-xs font-semibold px-4 py-1.5 border-b border-amber-500/40 shadow-inner flex items-center justify-between overflow-hidden"
+            className="bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-amber-50 text-xs font-semibold px-4 py-1.5 border-b border-amber-500/40 shadow-inner flex flex-wrap items-center justify-between gap-2 overflow-hidden"
           >
             <div className="flex items-center gap-2 max-w-4xl truncate">
               <span className="relative flex h-2 w-2 shrink-0">
@@ -50,18 +60,35 @@ export function Header() {
               </span>
               <AlertCircle className="w-3.5 h-3.5 text-amber-200 shrink-0" />
               <span className="truncate">
-                <strong>Reconnecting...</strong> Synchronizing with real-time VPP telemetry stream (Attempt #{reconnectAttempt || 1}, next in {reconnectDelaySec || 1}s). Displaying last known good telemetry.
+                <strong>Reconnecting...</strong> Synchronizing with <code className="bg-amber-900/50 px-1.5 py-0.5 rounded text-[10px] font-mono">{resolvedWsUrl || 'wss://...'}</code> (Attempt #{reconnectAttempt || 1}, next in {reconnectDelaySec || 1}s). Active fallback simulation active.
               </span>
             </div>
 
-            <button
-              onClick={reconnectNow}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold transition shrink-0 ml-3 cursor-pointer shadow-xs"
-              title="Force reconnect immediately"
-            >
-              <RefreshCw className="w-3 h-3 animate-spin" />
-              Reconnect Now
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  const input = window.prompt(
+                    'Enter live Cloudflare / Render backend URL (e.g. wss://xyz.trycloudflare.com or https://xyz.trycloudflare.com):',
+                    resolvedWsUrl
+                  );
+                  if (input !== null) {
+                    setCustomWsUrl(input);
+                  }
+                }}
+                className="px-2 py-0.5 rounded-md bg-white/15 hover:bg-white/25 text-white text-[11px] font-semibold transition cursor-pointer border border-white/20"
+                title="Change backend WebSocket URL"
+              >
+                ⚙️ Set URL
+              </button>
+              <button
+                onClick={reconnectNow}
+                className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/25 hover:bg-white/35 text-white text-[11px] font-bold transition cursor-pointer shadow-xs"
+                title="Force reconnect immediately"
+              >
+                <RefreshCw className="w-3 h-3 animate-spin" />
+                Reconnect Now
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
