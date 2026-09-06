@@ -206,22 +206,24 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    let wsUrl: string;
+    let wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+
     if (typeof window !== 'undefined') {
       const isHttps = window.location.protocol === 'https:';
-      const proto = isHttps ? 'wss:' : 'ws:';
 
-      if (process.env.NEXT_PUBLIC_WS_URL) {
-        wsUrl = process.env.NEXT_PUBLIC_WS_URL;
-        if (isHttps && wsUrl.startsWith('ws://')) {
-          wsUrl = wsUrl.replace(/^ws:\/\//, 'wss://');
-        }
-      } else {
-        // Automatically route through current origin's gateway over wss: (or ws: on local dev)
+      if (!wsUrl) {
+        console.warn('[VPP WebSocket] NEXT_PUBLIC_WS_URL not set, dynamically falling back to current origin host');
+        const proto = isHttps ? 'wss:' : 'ws:';
         wsUrl = `${proto}//${window.location.host}/ws/live`;
+      } else if (isHttps && wsUrl.startsWith('ws://')) {
+        console.error(
+          'Invalid WS_URL config:', wsUrl,
+          '— must be wss:// when page is served over https. Auto-upgrading protocol.'
+        );
+        wsUrl = wsUrl.replace(/^ws:\/\//, 'wss://');
       }
     } else {
-      wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws/live';
+      wsUrl = wsUrl || 'ws://localhost:8000/ws/live';
     }
 
     try {
